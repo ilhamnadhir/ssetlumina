@@ -126,20 +126,46 @@ const PublicationDetail = () => {
                                     <FiBook className="text-primary" />
                                     <h4 style={{ margin: 0 }}>Journal Information</h4>
                                 </div>
-                                <p className="text-secondary" style={{ marginBottom: '0.5rem', fontWeight: '500' }}>
+                                <p className="text-secondary" style={{ marginBottom: '0.75rem', fontWeight: '500', fontSize: '1.05rem' }}>
                                     {publication.venue}
                                 </p>
-                                <div className="flex flex-column gap-xs text-muted" style={{ fontSize: '0.875rem' }}>
+                                <div className="grid gap-xs" style={{ gridTemplateColumns: 'auto 1fr', fontSize: '0.875rem', rowGap: '0.5rem' }}>
                                     {publication.publishedDate && (
-                                        <div className="flex items-center gap-sm">
-                                            <FiCalendar size={14} />
-                                            <span>Published: {formatDate(publication.publishedDate)}</span>
-                                        </div>
+                                        <>
+                                            <span className="text-muted">Published:</span>
+                                            <span className="text-secondary">{formatDate(publication.publishedDate)}</span>
+                                        </>
                                     )}
-                                    {publication.year && <p style={{ margin: 0 }}>Year: {publication.year}</p>}
-                                    {publication.volume && <p style={{ margin: 0 }}>Volume: {publication.volume}</p>}
-                                    {publication.issue && <p style={{ margin: 0 }}>Issue: {publication.issue}</p>}
-                                    {publication.pages && <p style={{ margin: 0 }}>Pages: {publication.pages}</p>}
+                                    {publication.year && (
+                                        <>
+                                            <span className="text-muted">Year:</span>
+                                            <span className="text-secondary">{publication.year}</span>
+                                        </>
+                                    )}
+                                    {publication.volume && (
+                                        <>
+                                            <span className="text-muted">Volume:</span>
+                                            <span className="text-secondary">{publication.volume}</span>
+                                        </>
+                                    )}
+                                    {publication.issue && (
+                                        <>
+                                            <span className="text-muted">Issue:</span>
+                                            <span className="text-secondary">{publication.issue}</span>
+                                        </>
+                                    )}
+                                    {publication.pages && (
+                                        <>
+                                            <span className="text-muted">Pages:</span>
+                                            <span className="text-secondary">{publication.pages}</span>
+                                        </>
+                                    )}
+                                    {publication.publisher && (
+                                        <>
+                                            <span className="text-muted">Publisher:</span>
+                                            <span className="text-secondary">{publication.publisher}</span>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
@@ -150,19 +176,19 @@ const PublicationDetail = () => {
                                         <FiAward className="text-primary" />
                                         <h4 style={{ margin: 0 }}>Journal Metrics</h4>
                                     </div>
-                                    <div className="flex flex-column gap-xs">
+                                    <div className="flex flex-column gap-md">
                                         {publication.impactFactor && (
                                             <div>
-                                                <p className="text-muted" style={{ fontSize: '0.75rem', margin: 0 }}>Impact Factor</p>
-                                                <p className="text-secondary" style={{ fontSize: '1.5rem', fontWeight: '600', margin: '0.25rem 0' }}>
+                                                <p className="text-muted" style={{ fontSize: '0.7rem', margin: 0 }}>Impact Factor</p>
+                                                <p className="text-primary" style={{ fontSize: '2rem', fontWeight: '700', margin: '0.25rem 0' }}>
                                                     {publication.impactFactor}
                                                 </p>
                                             </div>
                                         )}
                                         {publication.issn && (
-                                            <div style={{ marginTop: '0.5rem' }}>
-                                                <p className="text-muted" style={{ fontSize: '0.75rem', margin: 0 }}>ISSN</p>
-                                                <p className="text-secondary" style={{ margin: '0.25rem 0' }}>
+                                            <div>
+                                                <p className="text-muted" style={{ fontSize: '0.7rem', margin: 0 }}>ISSN</p>
+                                                <p className="text-secondary" style={{ fontSize: '1.1rem', fontFamily: 'monospace', margin: '0.25rem 0' }}>
                                                     {publication.issn}
                                                 </p>
                                             </div>
@@ -199,19 +225,34 @@ const PublicationDetail = () => {
                                     <FiBook className="text-primary" />
                                     <h4 style={{ margin: 0 }}>Conference Information</h4>
                                 </div>
-                                <p className="text-secondary" style={{ marginBottom: '0.5rem', fontWeight: '500' }}>
+                                <p className="text-secondary" style={{ marginBottom: '0.75rem', fontWeight: '500', fontSize: '1.05rem' }}>
                                     {publication.venue}
                                 </p>
-                                <div className="flex flex-column gap-xs text-muted" style={{ fontSize: '0.875rem' }}>
+                                <div className="grid gap-xs" style={{ gridTemplateColumns: 'auto 1fr', fontSize: '0.875rem', rowGap: '0.5rem' }}>
                                     {publication.publishedDate && (
-                                        <div className="flex items-center gap-sm">
-                                            <FiCalendar size={14} />
-                                            <span>Published: {formatDate(publication.publishedDate)}</span>
-                                        </div>
+                                        <>
+                                            <span className="text-muted">Published:</span>
+                                            <span className="text-secondary">{formatDate(publication.publishedDate)}</span>
+                                        </>
                                     )}
-                                    {publication.year && <p style={{ margin: 0 }}>Year: {publication.year}</p>}
-                                    {publication.publisher && <p style={{ margin: 0 }}>Publisher: {publication.publisher}</p>}
-                                    {publication.pages && <p style={{ margin: 0 }}>Pages: {publication.pages}</p>}
+                                    {publication.year && (
+                                        <>
+                                            <span className="text-muted">Year:</span>
+                                            <span className="text-secondary">{publication.year}</span>
+                                        </>
+                                    )}
+                                    {publication.publisher && (
+                                        <>
+                                            <span className="text-muted">Publisher:</span>
+                                            <span className="text-secondary">{publication.publisher}</span>
+                                        </>
+                                    )}
+                                    {publication.pages && (
+                                        <>
+                                            <span className="text-muted">Pages:</span>
+                                            <span className="text-secondary">{publication.pages}</span>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
@@ -222,7 +263,7 @@ const PublicationDetail = () => {
                                         <FiFileText className="text-primary" />
                                         <h4 style={{ margin: 0 }}>ISBN</h4>
                                     </div>
-                                    <p className="text-secondary" style={{ fontSize: '1.125rem', margin: 0 }}>
+                                    <p className="text-secondary" style={{ fontSize: '1.25rem', fontFamily: 'monospace', margin: 0 }}>
                                         {publication.isbn}
                                     </p>
                                 </div>
@@ -261,7 +302,14 @@ const PublicationDetail = () => {
                     {publication.abstract && (
                         <div className="mb-lg">
                             <h3 className="mb-md">Abstract</h3>
-                            <p className="text-muted" style={{ lineHeight: '1.6' }}>
+                            <p className="text-muted" style={{
+                                lineHeight: '1.7',
+                                fontSize: '1rem',
+                                padding: '1rem',
+                                background: 'var(--bg-tertiary)',
+                                borderRadius: 'var(--radius-md)',
+                                borderLeft: '4px solid var(--primary)'
+                            }}>
                                 {publication.abstract}
                             </p>
                         </div>
@@ -276,7 +324,7 @@ const PublicationDetail = () => {
                             </div>
                             <div className="flex gap-sm" style={{ flexWrap: 'wrap' }}>
                                 {publication.keywords.map((keyword, index) => (
-                                    <span key={index} className="badge badge-primary">
+                                    <span key={index} className="badge badge-primary" style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}>
                                         {keyword}
                                     </span>
                                 ))}

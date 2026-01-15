@@ -96,41 +96,152 @@ const Publications = () => {
                                 e.currentTarget.style.boxShadow = '';
                             }}
                         >
-                            <div className="flex justify-between items-center mb-md">
-                                <h3 style={{ margin: 0 }}>{pub.title}</h3>
-                                <span className={`badge ${pub.type === 'journal' ? 'badge-primary' : 'badge-success'}`}>
-                                    {pub.type}
-                                </span>
+                            {/* Header */}
+                            <div className="flex justify-between items-start mb-md" style={{ gap: '1rem' }}>
+                                <h3 style={{ margin: 0, flex: 1 }}>{pub.title}</h3>
+                                <div className="flex gap-xs" style={{ flexWrap: 'wrap', flexShrink: 0 }}>
+                                    <span className={`badge ${pub.type === 'journal' ? 'badge-primary' : 'badge-success'}`}>
+                                        {pub.type}
+                                    </span>
+                                    {pub.journalType && (
+                                        <span className="badge badge-success" style={{ textTransform: 'capitalize' }}>
+                                            {pub.journalType}
+                                        </span>
+                                    )}
+                                    {pub.conferenceType && (
+                                        <span className="badge badge-success" style={{ textTransform: 'capitalize' }}>
+                                            {pub.conferenceType.replace('-', ' ')}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
 
-                            <p className="text-muted mb-sm">
-                                {pub.authors.map(a => a.name).join(', ')}
+                            {/* Authors */}
+                            <p className="text-muted mb-sm" style={{ fontSize: '0.9rem' }}>
+                                <strong>Authors:</strong> {pub.authors.map(a => a.name).join(', ')}
                             </p>
 
-                            <p className="text-secondary mb-md">
+                            {/* Venue & Year */}
+                            <p className="text-secondary mb-md" style={{ fontSize: '1rem', fontWeight: 500 }}>
                                 {pub.venue} • {pub.year}
+                                {pub.publishedDate && ` • ${new Date(pub.publishedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}`}
                             </p>
 
+                            {/* Metadata Grid */}
+                            <div className="grid gap-sm mb-md" style={{
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                                padding: '0.75rem',
+                                background: 'var(--bg-tertiary)',
+                                borderRadius: 'var(--radius-md)',
+                                border: '1px solid var(--border)'
+                            }}>
+                                {/* Journal-specific metadata */}
+                                {pub.type === 'journal' && (
+                                    <>
+                                        {pub.impactFactor && (
+                                            <div>
+                                                <div className="text-muted" style={{ fontSize: '0.7rem', marginBottom: '0.25rem' }}>Impact Factor</div>
+                                                <div className="text-primary" style={{ fontSize: '1.1rem', fontWeight: 600 }}>{pub.impactFactor}</div>
+                                            </div>
+                                        )}
+                                        {pub.issn && (
+                                            <div>
+                                                <div className="text-muted" style={{ fontSize: '0.7rem', marginBottom: '0.25rem' }}>ISSN</div>
+                                                <div className="text-secondary" style={{ fontSize: '0.9rem', fontFamily: 'monospace' }}>{pub.issn}</div>
+                                            </div>
+                                        )}
+                                        {pub.volume && (
+                                            <div>
+                                                <div className="text-muted" style={{ fontSize: '0.7rem', marginBottom: '0.25rem' }}>Volume</div>
+                                                <div className="text-secondary" style={{ fontSize: '0.9rem' }}>{pub.volume}</div>
+                                            </div>
+                                        )}
+                                        {pub.issue && (
+                                            <div>
+                                                <div className="text-muted" style={{ fontSize: '0.7rem', marginBottom: '0.25rem' }}>Issue</div>
+                                                <div className="text-secondary" style={{ fontSize: '0.9rem' }}>{pub.issue}</div>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+
+                                {/* Conference-specific metadata */}
+                                {pub.type === 'conference' && pub.isbn && (
+                                    <div>
+                                        <div className="text-muted" style={{ fontSize: '0.7rem', marginBottom: '0.25rem' }}>ISBN</div>
+                                        <div className="text-secondary" style={{ fontSize: '0.9rem', fontFamily: 'monospace' }}>{pub.isbn}</div>
+                                    </div>
+                                )}
+
+                                {/* Common metadata */}
+                                {pub.pages && (
+                                    <div>
+                                        <div className="text-muted" style={{ fontSize: '0.7rem', marginBottom: '0.25rem' }}>Pages</div>
+                                        <div className="text-secondary" style={{ fontSize: '0.9rem' }}>{pub.pages}</div>
+                                    </div>
+                                )}
+                                {pub.publisher && (
+                                    <div>
+                                        <div className="text-muted" style={{ fontSize: '0.7rem', marginBottom: '0.25rem' }}>Publisher</div>
+                                        <div className="text-secondary" style={{ fontSize: '0.9rem' }}>{pub.publisher}</div>
+                                    </div>
+                                )}
+                                {pub.doi && (
+                                    <div style={{ gridColumn: 'span 2' }}>
+                                        <div className="text-muted" style={{ fontSize: '0.7rem', marginBottom: '0.25rem' }}>DOI</div>
+                                        <div className="text-secondary" style={{ fontSize: '0.85rem', fontFamily: 'monospace', wordBreak: 'break-all' }}>{pub.doi}</div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Indexing */}
+                            {pub.indexing && pub.indexing.length > 0 && (
+                                <div className="mb-sm">
+                                    <span className="text-muted" style={{ fontSize: '0.75rem', fontWeight: 600, marginRight: '0.5rem' }}>
+                                        Indexed in:
+                                    </span>
+                                    <div style={{ display: 'inline-flex', gap: '0.25rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                                        {pub.indexing.map((index, idx) => (
+                                            <span key={idx} className="badge badge-primary" style={{ fontSize: '0.7rem' }}>
+                                                {index}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Abstract */}
                             {pub.abstract && (
-                                <p className="text-muted" style={{ fontSize: '0.875rem' }}>
+                                <p className="text-muted mb-md" style={{
+                                    fontSize: '0.875rem',
+                                    lineHeight: '1.5',
+                                    borderLeft: '3px solid var(--primary)',
+                                    paddingLeft: '0.75rem',
+                                    marginTop: '0.75rem'
+                                }}>
                                     {pub.abstract.substring(0, 200)}...
                                 </p>
                             )}
 
-                            <div className="flex gap-sm mt-md">
+                            {/* Footer */}
+                            <div className="flex gap-sm" style={{ flexWrap: 'wrap', alignItems: 'center', paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
                                 <span className="badge badge-primary">{pub.department?.name}</span>
-                                {pub.doi && <span className="text-muted" style={{ fontSize: '0.75rem' }}>DOI: {pub.doi}</span>}
+                                {pub.affiliation && (
+                                    <span className="text-muted" style={{ fontSize: '0.75rem' }}>
+                                        {pub.affiliation}
+                                    </span>
+                                )}
                             </div>
                         </div>
                     ))}
                 </div>
-
-                {publications.length === 0 && (
-                    <div className="text-center p-xl">
-                        <p className="text-muted">No publications found</p>
-                    </div>
-                )}
             </div>
+
+            {publications.length === 0 && (
+                <div className="text-center p-xl">
+                    <p className="text-muted">No publications found</p>
+                </div>
+            )}
         </div>
     );
 };
