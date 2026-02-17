@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { departmentsAPI, publicationsAPI } from '../services/api';
 import { FiSearch } from 'react-icons/fi';
 
 const Departments = () => {
+    const [searchParams] = useSearchParams();
     const [departments, setDepartments] = useState([]);
     const [selectedDept, setSelectedDept] = useState(null);
     const [deptDetails, setDeptDetails] = useState(null);
@@ -23,7 +25,15 @@ const Departments = () => {
         try {
             const res = await departmentsAPI.getAll();
             setDepartments(res.data.departments);
-            if (res.data.departments.length > 0) {
+
+            // Check if there's a dept parameter in the URL
+            const deptParam = searchParams.get('dept');
+
+            if (deptParam) {
+                // If dept parameter exists, use it
+                setSelectedDept(deptParam);
+            } else if (res.data.departments.length > 0) {
+                // Otherwise, default to the first department
                 setSelectedDept(res.data.departments[0]._id);
             }
         } catch (error) {

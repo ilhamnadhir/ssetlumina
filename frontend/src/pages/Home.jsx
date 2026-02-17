@@ -88,7 +88,7 @@ const Home = () => {
                         </div>
                         <div className="departments-list">
                             {departments.map((dept) => (
-                                <Link to={`/departments`} key={dept._id} className="department-item">
+                                <Link to={`/departments?dept=${dept._id}`} key={dept._id} className="department-item">
                                     <div className="department-info">
                                         <h3>{dept.name}</h3>
                                         <p className="department-code">{dept.code}</p>
