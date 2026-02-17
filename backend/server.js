@@ -17,7 +17,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: "*"
+  origin: "https://minipro-og.vercel.app"
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
