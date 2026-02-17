@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import api, { departmentsAPI, authAPI } from '../services/api';
 import { FiMail, FiLock, FiBook, FiUser, FiBriefcase, FiHash } from 'react-icons/fi';
 import './Login.css';
 
@@ -31,8 +31,8 @@ const Login = () => {
 
     const fetchDepartments = async () => {
         try {
-            const response = await fetch('/api/departments');
-            const data = await response.json();
+            const response = await departmentsAPI.getAll();
+            const data = response.data;
             setDepartments(data.departments || []);
             if (data.departments && data.departments.length > 0) {
                 setDepartment(data.departments[0]._id);
@@ -78,16 +78,11 @@ const Login = () => {
             // Register new user and create faculty profile
             try {
                 // First, register the user
-                const userResponse = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, role: 'faculty' })
-                });
+                const userResponse = await authAPI.register({ email, password, role: 'faculty' });
+                const userData = userResponse.data;
 
-                const userData = await userResponse.json();
-
-                if (!userResponse.ok) {
-                    setError(userData.message || 'Registration failed');
+                if (!userData) {
+                    setError('Registration failed');
                     setLoading(false);
                     return;
                 }
