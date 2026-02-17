@@ -16,6 +16,7 @@ dotenv.config();
 const app = express();
 
 // Middleware
+
 app.use(cors({
   origin: "https://minipro-og.vercel.app"
 }));
