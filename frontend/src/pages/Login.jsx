@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -15,7 +15,6 @@ const Login = () => {
     const [role, setRole] = useState('');
     const [phone, setPhone] = useState('');
     const [specialization, setSpecialization] = useState('');
-    const [departments, setDepartments] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [isRegister, setIsRegister] = useState(false);
@@ -24,25 +23,6 @@ const Login = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    // Fetch departments for registration
-    useEffect(() => {
-        if (isRegister) {
-            fetchDepartments();
-        }
-    }, [isRegister]);
-
-    const fetchDepartments = async () => {
-        try {
-            const response = await api.get('/departments');
-            const data = response.data;
-            setDepartments(data.departments || []);
-            if (data.departments && data.departments.length > 0) {
-                setDepartment(data.departments[0]._id);
-            }
-        } catch (err) {
-            console.error('Error fetching departments:', err);
-        }
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
