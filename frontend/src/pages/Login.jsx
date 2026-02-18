@@ -31,8 +31,8 @@ const Login = () => {
 
     const fetchDepartments = async () => {
         try {
-            const response = await fetch('/api/departments');
-            const data = await response.json();
+            const response = await api.get('/departments');
+            const data = response.data;
             setDepartments(data.departments || []);
             if (data.departments && data.departments.length > 0) {
                 setDepartment(data.departments[0]._id);
@@ -78,16 +78,12 @@ const Login = () => {
             // Register new user and create faculty profile
             try {
                 // First, register the user
-                const userResponse = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, role: 'faculty' })
-                });
-
-                const userData = await userResponse.json();
-
-                if (!userResponse.ok) {
-                    setError(userData.message || 'Registration failed');
+                let userData;
+                try {
+                    const userResponse = await api.post('/auth/register', { email, password, role: 'faculty' });
+                    userData = userResponse.data;
+                } catch (regErr) {
+                    setError(regErr.response?.data?.message || 'Registration failed');
                     setLoading(false);
                     return;
                 }
