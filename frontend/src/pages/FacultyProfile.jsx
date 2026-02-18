@@ -258,9 +258,9 @@ const FacultyProfile = () => {
         <div className="home-page">
             <div className="container">
                 <div className="section-card mb-lg">
-                    <div className="flex gap-xl" style={{ alignItems: 'flex-start' }}>
+                    <div className="profile-header">
                         {/* Profile photo with camera overlay for own profile */}
-                        <div style={{ position: 'relative', width: '200px', flexShrink: 0 }}>
+                        <div className="profile-photo-wrap" style={{ position: 'relative', width: '200px', flexShrink: 0 }}>
                             <img
                                 src={convertDriveUrl(faculty.profilePhoto) || 'https://via.placeholder.com/200'}
                                 alt={faculty.name}

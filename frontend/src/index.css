@@ -349,6 +349,78 @@ a:hover {
   }
 }
 
+/* Profile header — stacks on mobile */
+.profile-header {
+  display: flex;
+  gap: var(--spacing-xl);
+  align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+
+  /* Typography */
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  /* Container padding */
+  .container {
+    padding: 0 var(--spacing-md);
+  }
+
+  /* Section card padding */
+  .section-card {
+    padding: var(--spacing-lg);
+  }
+
+  /* Profile header stacks vertically */
+  .profile-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-header .profile-photo-wrap {
+    width: 140px !important;
+  }
+
+  .profile-header .profile-photo-wrap img {
+    width: 140px !important;
+    height: 140px !important;
+  }
+
+  /* justify-between becomes column on mobile */
+  .profile-header .flex.justify-between {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  /* Modal smaller padding */
+  .modal-content {
+    padding: var(--spacing-lg);
+    width: 95%;
+  }
+
+  /* gap-xl shrinks */
+  .gap-xl {
+    gap: var(--spacing-lg);
+  }
+
+  /* Stats grid 2 columns on mobile */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
 /* Flex Utilities */
 .flex {
   display: flex;
