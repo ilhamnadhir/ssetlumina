@@ -2,6 +2,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FiHome, FiBook, FiUsers, FiFileText, FiLogOut, FiSettings, FiSun, FiMoon, FiUser, FiMenu, FiX } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
+import { facultyAPI } from '../services/api';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -10,9 +11,30 @@ const Navbar = () => {
     const location = useLocation();
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
     const [menuOpen, setMenuOpen] = useState(false);
+    const [myFacultyId, setMyFacultyId] = useState(null);
+
+    // Fetch own faculty ID once so we can highlight "My Profile" correctly
+    useEffect(() => {
+        if (user && !isAdmin()) {
+            facultyAPI.getMe()
+                .then(res => setMyFacultyId(res.data.faculty?._id))
+                .catch(() => { });
+        }
+    }, [user]);
 
     const isActive = (path) => {
         if (path === '/') return location.pathname === '/';
+        // "My Profile" should be active when on /profile OR on own /faculty/:id page
+        if (path === '/profile') {
+            if (location.pathname === '/profile') return true;
+            if (myFacultyId && location.pathname === `/faculty/${myFacultyId}`) return true;
+            return false;
+        }
+        // "Faculty" should NOT be active when on own profile page
+        if (path === '/faculty') {
+            if (myFacultyId && location.pathname === `/faculty/${myFacultyId}`) return false;
+            return location.pathname.startsWith('/faculty');
+        }
         return location.pathname.startsWith(path);
     };
 
