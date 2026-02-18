@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { FiMail, FiLock, FiBook, FiUser, FiBriefcase, FiHash } from 'react-icons/fi';
+import { FiMail, FiLock, FiBook, FiUser, FiBriefcase, FiHash, FiEye, FiEyeOff } from 'react-icons/fi';
 import './Login.css';
 
 const Login = () => {
@@ -19,6 +19,8 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [isRegister, setIsRegister] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
 
@@ -265,6 +267,7 @@ const Login = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="your.email@scmsgroup.com"
+                            autoComplete="off"
                             required
                         />
                         <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
@@ -277,15 +280,26 @@ const Login = () => {
                             <FiLock />
                             Password *
                         </label>
-                        <input
-                            type="password"
-                            className="form-input"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Enter your password"
-                            required
-                            minLength={6}
-                        />
+                        <div className="password-wrapper">
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                className="form-input"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Enter your password"
+                                autoComplete="new-password"
+                                required
+                                minLength={6}
+                            />
+                            <button
+                                type="button"
+                                className="eye-toggle"
+                                onClick={() => setShowPassword(!showPassword)}
+                                tabIndex={-1}
+                            >
+                                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                            </button>
+                        </div>
                         <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
                             Minimum 6 characters
                         </small>
@@ -297,15 +311,26 @@ const Login = () => {
                                 <FiLock />
                                 Confirm Password *
                             </label>
-                            <input
-                                type="password"
-                                className="form-input"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                placeholder="Re-enter your password"
-                                required
-                                minLength={6}
-                            />
+                            <div className="password-wrapper">
+                                <input
+                                    type={showConfirmPassword ? 'text' : 'password'}
+                                    className="form-input"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="Re-enter your password"
+                                    autoComplete="new-password"
+                                    required
+                                    minLength={6}
+                                />
+                                <button
+                                    type="button"
+                                    className="eye-toggle"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    tabIndex={-1}
+                                >
+                                    {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                                </button>
+                            </div>
                         </div>
                     )}
 

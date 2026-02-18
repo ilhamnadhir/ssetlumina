@@ -134,3 +134,33 @@
     display: block;
     margin-bottom: var(--spacing-xs);
 }
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper .form-input {
+    width: 100%;
+    padding-right: 2.75rem;
+}
+
+.eye-toggle {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+    z-index: 2;
+}
+
+.eye-toggle:hover {
+    color: var(--primary);
+}
