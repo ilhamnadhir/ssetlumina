@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { facultyAPI, publicationsAPI, departmentsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { FiMail, FiPhone, FiBook, FiAward, FiPlus, FiX, FiEdit } from 'react-icons/fi';
+import { FiMail, FiPhone, FiBook, FiAward, FiPlus, FiX, FiEdit, FiTrash2 } from 'react-icons/fi';
 
 // Helper function to convert Google Drive links to direct image URLs
 const convertDriveUrl = (url) => {
@@ -50,6 +50,19 @@ const FacultyProfile = () => {
         qualifications: [],
         profilePhoto: ''
     });
+    const [showEditPubModal, setShowEditPubModal] = useState(false);
+    const [editingPub, setEditingPub] = useState(null);
+    const [editPubData, setEditPubData] = useState({
+        title: '',
+        type: 'journal',
+        year: new Date().getFullYear(),
+        venue: '',
+        abstract: '',
+        doi: '',
+        volume: '',
+        issue: '',
+        pages: ''
+    });
     const [formData, setFormData] = useState({
         title: '',
         authors: [],
@@ -65,10 +78,15 @@ const FacultyProfile = () => {
     });
 
     // Check if this is the logged-in user's own profile
+    // Note: login response uses 'id' not '_id', so check both
+    const userId = user?.id || user?._id;
+    const userFacultyId = user?.facultyId;
     const isOwnProfile = user && faculty && (
-        user.facultyId === faculty._id ||
-        user.facultyId?._id === faculty._id ||
-        user._id === faculty.userId
+        (userFacultyId && (
+            userFacultyId.toString() === faculty._id?.toString() ||
+            userFacultyId?._id?.toString() === faculty._id?.toString()
+        )) ||
+        (userId && userId.toString() === faculty.userId?.toString())
     );
 
     // Debug logging
@@ -145,6 +163,46 @@ const FacultyProfile = () => {
             fetchData(); // Refresh publications list
         } catch (error) {
             alert(error.response?.data?.message || 'Failed to add publication');
+        }
+    };
+
+    const handleEditPublication = (pub, e) => {
+        e.stopPropagation();
+        setEditingPub(pub);
+        setEditPubData({
+            title: pub.title,
+            type: pub.type,
+            year: pub.year,
+            venue: pub.venue || '',
+            abstract: pub.abstract || '',
+            doi: pub.doi || '',
+            volume: pub.volume || '',
+            issue: pub.issue || '',
+            pages: pub.pages || ''
+        });
+        setShowEditPubModal(true);
+    };
+
+    const handleEditPubSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await publicationsAPI.update(editingPub._id, editPubData);
+            setShowEditPubModal(false);
+            setEditingPub(null);
+            fetchData();
+        } catch (error) {
+            alert(error.response?.data?.message || 'Failed to update publication');
+        }
+    };
+
+    const handleDeletePublication = async (pubId, e) => {
+        e.stopPropagation();
+        if (!window.confirm('Are you sure you want to delete this publication?')) return;
+        try {
+            await publicationsAPI.delete(pubId);
+            fetchData();
+        } catch (error) {
+            alert(error.response?.data?.message || 'Failed to delete publication');
         }
     };
 
@@ -277,8 +335,7 @@ const FacultyProfile = () => {
 
                     <div className="grid gap-md">
                         {publications.map((pub) => (
-                            <div
-                                key={pub._id}
+                            <div key={pub._id}
                                 className="card"
                                 onClick={() => navigate(`/publications/${pub._id}`)}
                                 style={{ cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}
@@ -293,9 +350,29 @@ const FacultyProfile = () => {
                             >
                                 <div className="flex justify-between items-center mb-sm">
                                     <h4 style={{ margin: 0 }}>{pub.title}</h4>
-                                    <span className={`badge ${pub.type === 'journal' ? 'badge-primary' : 'badge-success'}`}>
-                                        {pub.type}
-                                    </span>
+                                    <div className="flex gap-sm" style={{ alignItems: 'center' }}>
+                                        <span className={`badge ${pub.type === 'journal' ? 'badge-primary' : 'badge-success'}`}>
+                                            {pub.type}
+                                        </span>
+                                        {isOwnProfile && (
+                                            <>
+                                                <button
+                                                    onClick={(e) => handleEditPublication(pub, e)}
+                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '4px' }}
+                                                    title="Edit publication"
+                                                >
+                                                    <FiEdit size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => handleDeletePublication(pub._id, e)}
+                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger, #ef4444)', padding: '4px' }}
+                                                    title="Delete publication"
+                                                >
+                                                    <FiTrash2 size={16} />
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                                 <p className="text-secondary mb-sm">{pub.venue} • {pub.year}</p>
                                 {pub.abstract && (
@@ -314,6 +391,94 @@ const FacultyProfile = () => {
                     )}
                 </div>
             </div>
+
+            {/* Edit Publication Modal */}
+            {showEditPubModal && editingPub && (
+                <div className="modal-overlay" onClick={() => setShowEditPubModal(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px' }}>
+                        <div className="flex justify-between items-center mb-lg">
+                            <h3>Edit Publication</h3>
+                            <button onClick={() => setShowEditPubModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '1.5rem' }}>
+                                <FiX size={24} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleEditPubSubmit}>
+                            <div className="form-group">
+                                <label className="form-label">Title *</label>
+                                <input type="text" className="form-input" value={editPubData.title}
+                                    onChange={(e) => setEditPubData({ ...editPubData, title: e.target.value })} required />
+                            </div>
+
+                            <div className="grid grid-2 gap-md">
+                                <div className="form-group">
+                                    <label className="form-label">Type *</label>
+                                    <select className="form-select" value={editPubData.type}
+                                        onChange={(e) => setEditPubData({ ...editPubData, type: e.target.value })} required>
+                                        <option value="journal">Journal</option>
+                                        <option value="conference">Conference</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Year *</label>
+                                    <input type="number" className="form-input" value={editPubData.year}
+                                        onChange={(e) => setEditPubData({ ...editPubData, year: parseInt(e.target.value) })}
+                                        min="1900" max={new Date().getFullYear() + 1} required />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Venue *</label>
+                                <input type="text" className="form-input" value={editPubData.venue}
+                                    onChange={(e) => setEditPubData({ ...editPubData, venue: e.target.value })}
+                                    placeholder="Journal/Conference name" required />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Abstract</label>
+                                <textarea className="form-textarea" value={editPubData.abstract}
+                                    onChange={(e) => setEditPubData({ ...editPubData, abstract: e.target.value })}
+                                    placeholder="Publication abstract..." />
+                            </div>
+
+                            <div className="grid grid-2 gap-md">
+                                <div className="form-group">
+                                    <label className="form-label">DOI</label>
+                                    <input type="text" className="form-input" value={editPubData.doi}
+                                        onChange={(e) => setEditPubData({ ...editPubData, doi: e.target.value })}
+                                        placeholder="10.1234/example" />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Pages</label>
+                                    <input type="text" className="form-input" value={editPubData.pages}
+                                        onChange={(e) => setEditPubData({ ...editPubData, pages: e.target.value })}
+                                        placeholder="123-145" />
+                                </div>
+                            </div>
+
+                            {editPubData.type === 'journal' && (
+                                <div className="grid grid-2 gap-md">
+                                    <div className="form-group">
+                                        <label className="form-label">Volume</label>
+                                        <input type="text" className="form-input" value={editPubData.volume}
+                                            onChange={(e) => setEditPubData({ ...editPubData, volume: e.target.value })} />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Issue</label>
+                                        <input type="text" className="form-input" value={editPubData.issue}
+                                            onChange={(e) => setEditPubData({ ...editPubData, issue: e.target.value })} />
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex gap-md">
+                                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Save Changes</button>
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowEditPubModal(false)}>Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {/* Add Publication Modal */}
             {showModal && (
