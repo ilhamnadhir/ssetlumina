@@ -4,10 +4,10 @@ import Department from './models/Department.js';
 import Publication from './models/Publication.js';
 
 const departments = [
-    { name: 'Computer Science', code: 'CS', description: 'Department of Computer Science and Engineering', established: 1990 },
-    { name: 'Electronics', code: 'ECE', description: 'Department of Electronics and Communication Engineering', established: 1985 },
-    { name: 'Mechanical', code: 'ME', description: 'Department of Mechanical Engineering', established: 1980 },
-    { name: 'Civil', code: 'CE', description: 'Department of Civil Engineering', established: 1975 }
+    { name: 'B.Tech-CSE', code: 'CS', description: 'Department of Computer Science and Engineering', established: 1990 },
+    { name: 'B.Tech-ECE', code: 'ECE', description: 'Department of Electronics and Communication Engineering', established: 1985 },
+    { name: 'B.Tech-ME', code: 'ME', description: 'Department of Mechanical Engineering', established: 1980 },
+    { name: 'B.Tech-CE', code: 'CE', description: 'Department of Civil Engineering', established: 1975 }
 ];
 
 export async function autoSeedIfEmpty() {
