@@ -37,6 +37,23 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Get current user's own faculty profile
+router.get('/me', authenticate, async (req, res) => {
+    try {
+        const faculty = await Faculty.findOne({ userId: req.user._id })
+            .populate('department')
+            .populate('publicationCount');
+
+        if (!faculty) {
+            return res.status(404).json({ message: 'Faculty profile not found' });
+        }
+
+        res.json({ faculty });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
 // Get faculty by ID
 router.get('/:id', async (req, res) => {
     try {

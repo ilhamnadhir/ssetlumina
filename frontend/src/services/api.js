@@ -44,6 +44,7 @@ export const authAPI = {
 // Faculty API
 export const facultyAPI = {
     getAll: (params) => api.get('/faculty', { params }),
+    getMe: () => api.get('/faculty/me'),
     getById: (id) => api.get(`/faculty/${id}`),
     create: (data) => api.post('/faculty', data),
     update: (id, data) => api.put(`/faculty/${id}`, data),
