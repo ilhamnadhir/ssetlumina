@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FiHome, FiBook, FiUsers, FiFileText, FiLogOut, FiSettings, FiSun, FiMoon, FiUser } from 'react-icons/fi';
+import { FiHome, FiBook, FiUsers, FiFileText, FiLogOut, FiSettings, FiSun, FiMoon, FiUser, FiMenu, FiX } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
 import './Navbar.css';
 
@@ -9,82 +9,122 @@ const Navbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+    const [menuOpen, setMenuOpen] = useState(false);
 
-    // Helper function to check if a link is active
     const isActive = (path) => {
-        if (path === '/') {
-            return location.pathname === '/';
-        }
+        if (path === '/') return location.pathname === '/';
         return location.pathname.startsWith(path);
     };
+
+    // Close menu on route change
+    useEffect(() => {
+        setMenuOpen(false);
+    }, [location.pathname]);
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
     }, [theme]);
 
-    const toggleTheme = () => {
-        setTheme(theme === 'dark' ? 'light' : 'dark');
-    };
+    // Prevent body scroll when menu is open
+    useEffect(() => {
+        document.body.style.overflow = menuOpen ? 'hidden' : '';
+        return () => { document.body.style.overflow = ''; };
+    }, [menuOpen]);
+
+    const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
 
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
 
-    return (
-        <nav className="navbar">
-            <div className="navbar-container">
-                <Link to="/" className="navbar-brand">
-                    <FiBook className="brand-icon" />
-                    <span>Faculty Portal</span>
-                </Link>
+    const navLinks = [
+        { to: '/', icon: <FiHome />, label: 'Home' },
+        { to: '/departments', icon: <FiBook />, label: 'Departments' },
+        { to: '/publications', icon: <FiFileText />, label: 'Publications' },
+        { to: '/faculty', icon: <FiUsers />, label: 'Faculty' },
+        ...(isAdmin() ? [{ to: '/admin', icon: <FiSettings />, label: 'Admin' }] : []),
+        ...(!isAdmin() && user ? [{ to: '/profile', icon: <FiUser />, label: 'My Profile' }] : []),
+    ];
 
-                <div className="navbar-links">
-                    <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>
-                        <FiHome />
-                        <span>Home</span>
+    return (
+        <>
+            <nav className="navbar">
+                <div className="navbar-container">
+                    <Link to="/" className="navbar-brand">
+                        <FiBook className="brand-icon" />
+                        <span>Faculty Portal</span>
                     </Link>
-                    <Link to="/departments" className={`nav-link ${isActive('/departments') ? 'active' : ''}`}>
-                        <FiBook />
-                        <span>Departments</span>
+
+                    {/* Desktop links */}
+                    <div className="navbar-links">
+                        {navLinks.map(({ to, icon, label }) => (
+                            <Link key={to} to={to} className={`nav-link ${isActive(to) ? 'active' : ''}`}>
+                                {icon}
+                                <span>{label}</span>
+                            </Link>
+                        ))}
+                    </div>
+
+                    {/* Desktop user controls */}
+                    <div className="navbar-user">
+                        <div className="user-info">
+                            <span className="user-email">{user?.email}</span>
+                            <span className="user-role badge badge-primary">{user?.role}</span>
+                        </div>
+                        <button onClick={toggleTheme} className="btn-theme" title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+                            {theme === 'dark' ? <FiSun /> : <FiMoon />}
+                        </button>
+                        <button onClick={handleLogout} className="btn-logout">
+                            <FiLogOut />
+                        </button>
+                        {/* Hamburger — mobile only */}
+                        <button className="btn-hamburger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+                            <FiMenu size={20} />
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            {/* Mobile overlay */}
+            <div className={`mobile-menu-overlay ${menuOpen ? 'open' : ''}`} onClick={() => setMenuOpen(false)} />
+
+            {/* Mobile drawer */}
+            <div className={`mobile-menu ${menuOpen ? 'open' : ''}`}>
+                <div className="mobile-menu-header">
+                    <Link to="/" className="navbar-brand" onClick={() => setMenuOpen(false)}>
+                        <FiBook className="brand-icon" />
+                        <span>Faculty Portal</span>
                     </Link>
-                    <Link to="/publications" className={`nav-link ${isActive('/publications') ? 'active' : ''}`}>
-                        <FiFileText />
-                        <span>Publications</span>
-                    </Link>
-                    <Link to="/faculty" className={`nav-link ${isActive('/faculty') ? 'active' : ''}`}>
-                        <FiUsers />
-                        <span>Faculty</span>
-                    </Link>
-                    {isAdmin() && (
-                        <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
-                            <FiSettings />
-                            <span>Admin</span>
-                        </Link>
-                    )}
-                    {!isAdmin() && user && (
-                        <Link to="/profile" className={`nav-link ${isActive('/profile') ? 'active' : ''}`}>
-                            <FiUser />
-                            <span>My Profile</span>
-                        </Link>
-                    )}
+                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }} onClick={() => setMenuOpen(false)}>
+                        <FiX size={22} />
+                    </button>
                 </div>
 
-                <div className="navbar-user">
-                    <div className="user-info">
-                        <span className="user-email">{user?.email}</span>
-                        <span className="user-role badge badge-primary">{user?.role}</span>
+                {navLinks.map(({ to, icon, label }) => (
+                    <Link key={to} to={to} className={`nav-link ${isActive(to) ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
+                        {icon}
+                        <span>{label}</span>
+                    </Link>
+                ))}
+
+                <div className="mobile-menu-footer">
+                    <div className="mobile-user-info">
+                        <span className="mobile-user-email">{user?.email}</span>
+                        <span className="mobile-user-role">{user?.role}</span>
                     </div>
-                    <button onClick={toggleTheme} className="btn-theme" title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
-                        {theme === 'dark' ? <FiSun /> : <FiMoon />}
-                    </button>
-                    <button onClick={handleLogout} className="btn-logout">
-                        <FiLogOut />
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button onClick={toggleTheme} className="btn-theme" title="Toggle theme">
+                            {theme === 'dark' ? <FiSun /> : <FiMoon />}
+                        </button>
+                        <button onClick={handleLogout} className="btn-logout">
+                            <FiLogOut />
+                        </button>
+                    </div>
                 </div>
             </div>
-        </nav>
+        </>
     );
 };
 

@@ -1,6 +1,7 @@
 import express from 'express';
 import Faculty from '../models/Faculty.js';
 import User from '../models/User.js';
+import Department from '../models/Department.js';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -76,10 +77,33 @@ router.post('/', authenticate, async (req, res) => {
             return res.status(400).json({ message: 'Email already registered as faculty' });
         }
 
+        // Resolve department: if it's a valid ObjectId use it directly,
+        // otherwise find or create a Department by name
+        let departmentId = department;
+        const isObjectId = /^[a-f\d]{24}$/i.test(department);
+        if (!isObjectId) {
+            // department is a plain string name — find or create
+            const deptCode = department.replace(/[^A-Z0-9]/gi, '').toUpperCase().slice(0, 10);
+            let dept = await Department.findOne({ name: department });
+            if (!dept) {
+                // Try by code in case it already exists with a slightly different name
+                dept = await Department.findOne({ code: deptCode });
+            }
+            if (!dept) {
+                dept = await Department.create({
+                    name: department,
+                    code: deptCode || 'DEPT' + Date.now().toString().slice(-4),
+                    description: department
+                });
+                console.log('✅ Auto-created department:', dept.name);
+            }
+            departmentId = dept._id;
+        }
+
         const faculty = new Faculty({
             name,
             facultyId,
-            department,
+            department: departmentId,
             role,
             email,
             phone,
