@@ -26,7 +26,7 @@ const Home = () => {
             const [statsRes, deptsRes, facultyRes] = await Promise.all([
                 adminAPI.getStats(),
                 departmentsAPI.getAll(),
-                facultyAPI.getAll({ limit: 6 })
+                facultyAPI.getAll({ sortBy: 'createdAt', order: 'desc' })
             ]);
 
             setStats(statsRes.data.overview);
