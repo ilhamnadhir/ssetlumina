@@ -12,7 +12,7 @@ const Login = () => {
     const [name, setName] = useState('');
     const [facultyId, setFacultyId] = useState('');
     const [department, setDepartment] = useState('');
-    const [role, setRole] = useState('Assistant Professor');
+    const [role, setRole] = useState('');
     const [phone, setPhone] = useState('');
     const [specialization, setSpecialization] = useState('');
     const [departments, setDepartments] = useState([]);
@@ -202,11 +202,18 @@ const Login = () => {
                                     onChange={(e) => setDepartment(e.target.value)}
                                     required
                                 >
-                                    {departments.map(dept => (
-                                        <option key={dept._id} value={dept._id}>
-                                            {dept.name} ({dept.code})
-                                        </option>
-                                    ))}
+                                    <option value="" disabled>Choose department</option>
+                                    <option value="M.Tech-EE">M.Tech - EE</option>
+                                    <option value="M.Tech-CSE">M.Tech - CSE</option>
+                                    <option value="MCA">MCA</option>
+                                    <option value="B.Tech-CSE">B.Tech - CSE</option>
+                                    <option value="B.Tech-AI&DS">B.Tech - AI&DS</option>
+                                    <option value="B.Tech-ECE">B.Tech - ECE</option>
+                                    <option value="B.Tech-ECE(VLSI)">B.Tech - ECE (VLSI)</option>
+                                    <option value="B.Tech-EEE">B.Tech - EEE</option>
+                                    <option value="B.Tech-ME">B.Tech - ME</option>
+                                    <option value="B.Tech-AU">B.Tech - AU</option>
+                                    <option value="B.Tech-CE">B.Tech - CE</option>
                                 </select>
                             </div>
 
@@ -221,6 +228,7 @@ const Login = () => {
                                     onChange={(e) => setRole(e.target.value)}
                                     required
                                 >
+                                    <option value="" disabled>Choose role</option>
                                     <option value="Professor">Professor</option>
                                     <option value="Associate Professor">Associate Professor</option>
                                     <option value="Assistant Professor">Assistant Professor</option>
