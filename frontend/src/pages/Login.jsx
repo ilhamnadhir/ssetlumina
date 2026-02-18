@@ -335,6 +335,8 @@ const Login = () => {
                                 // Reset form fields
                                 setName('');
                                 setFacultyId('');
+                                setDepartment('');
+                                setRole('');
                                 setPhone('');
                                 setSpecialization('');
                                 setConfirmPassword('');

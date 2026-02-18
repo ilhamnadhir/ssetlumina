@@ -164,3 +164,9 @@
 .eye-toggle:hover {
     color: var(--primary);
 }
+
+/* Show placeholder option as grayed out */
+select.form-select:invalid,
+select.form-select option[value=""] {
+    color: var(--text-muted);
+}
