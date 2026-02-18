@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { facultyAPI, publicationsAPI, departmentsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { FiMail, FiPhone, FiBook, FiAward, FiPlus, FiX, FiEdit, FiTrash2 } from 'react-icons/fi';
+import { FiMail, FiPhone, FiBook, FiAward, FiPlus, FiX, FiEdit, FiTrash2, FiCamera } from 'react-icons/fi';
 
 // Helper function to convert Google Drive links to direct image URLs
 const convertDriveUrl = (url) => {
@@ -221,6 +221,20 @@ const FacultyProfile = () => {
         setShowEditModal(true);
     };
 
+    const handlePhotoUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+            alert('Image must be under 2MB');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setEditFormData(prev => ({ ...prev, profilePhoto: reader.result }));
+        };
+        reader.readAsDataURL(file);
+    };
+
     const handleEditSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -245,17 +259,68 @@ const FacultyProfile = () => {
             <div className="container">
                 <div className="section-card mb-lg">
                     <div className="flex gap-xl" style={{ alignItems: 'flex-start' }}>
-                        <img
-                            src={convertDriveUrl(faculty.profilePhoto) || 'https://via.placeholder.com/200'}
-                            alt={faculty.name}
-                            style={{
-                                width: '200px',
-                                height: '200px',
-                                borderRadius: 'var(--radius-xl)',
-                                border: '4px solid var(--primary)',
-                                objectFit: 'cover'
-                            }}
-                        />
+                        {/* Profile photo with camera overlay for own profile */}
+                        <div style={{ position: 'relative', width: '200px', flexShrink: 0 }}>
+                            <img
+                                src={convertDriveUrl(faculty.profilePhoto) || 'https://via.placeholder.com/200'}
+                                alt={faculty.name}
+                                style={{
+                                    width: '200px',
+                                    height: '200px',
+                                    borderRadius: 'var(--radius-xl)',
+                                    border: '4px solid var(--primary)',
+                                    objectFit: 'cover',
+                                    display: 'block'
+                                }}
+                            />
+                            {isOwnProfile && (
+                                <label
+                                    htmlFor="profile-photo-upload"
+                                    title="Change photo"
+                                    style={{
+                                        position: 'absolute',
+                                        bottom: '8px',
+                                        right: '8px',
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '50%',
+                                        background: 'var(--primary)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        color: '#fff',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.4)'
+                                    }}
+                                >
+                                    <FiCamera size={16} />
+                                    <input
+                                        id="profile-photo-upload"
+                                        type="file"
+                                        accept="image/*"
+                                        style={{ display: 'none' }}
+                                        onChange={async (e) => {
+                                            const file = e.target.files[0];
+                                            if (!file) return;
+                                            if (file.size > 2 * 1024 * 1024) {
+                                                alert('Image must be under 2MB');
+                                                return;
+                                            }
+                                            const reader = new FileReader();
+                                            reader.onloadend = async () => {
+                                                try {
+                                                    await facultyAPI.update(faculty._id, { profilePhoto: reader.result });
+                                                    fetchData();
+                                                } catch {
+                                                    alert('Failed to update photo');
+                                                }
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }}
+                                    />
+                                </label>
+                            )}
+                        </div>
 
                         <div style={{ flex: 1 }}>
                             <div className="flex justify-between items-start mb-sm">
@@ -739,24 +804,32 @@ const FacultyProfile = () => {
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Profile Photo URL</label>
-                                <input
-                                    type="url"
-                                    className="form-input"
-                                    value={editFormData.profilePhoto}
-                                    onChange={(e) => setEditFormData({ ...editFormData, profilePhoto: e.target.value })}
-                                    placeholder="https://drive.google.com/file/d/YOUR_FILE_ID/view or any image URL"
-                                />
-                                {editFormData.profilePhoto && (
-                                    <div style={{ marginTop: 'var(--spacing-sm)' }}>
-                                        <img
-                                            src={convertDriveUrl(editFormData.profilePhoto)}
-                                            alt="Preview"
-                                            style={{ width: '100px', height: '100px', borderRadius: 'var(--radius-md)', objectFit: 'cover' }}
-                                            onError={(e) => e.target.src = 'https://via.placeholder.com/100'}
-                                        />
+                                <label className="form-label">Profile Photo</label>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
+                                    <img
+                                        src={editFormData.profilePhoto || 'https://via.placeholder.com/80'}
+                                        alt="Preview"
+                                        style={{ width: '80px', height: '80px', borderRadius: 'var(--radius-md)', objectFit: 'cover', border: '2px solid var(--border)', flexShrink: 0 }}
+                                        onError={(e) => e.target.src = 'https://via.placeholder.com/80'}
+                                    />
+                                    <div style={{ flex: 1 }}>
+                                        <label
+                                            htmlFor="edit-photo-upload"
+                                            className="btn btn-secondary"
+                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', marginBottom: '6px' }}
+                                        >
+                                            <FiCamera size={14} /> Choose Photo
+                                            <input
+                                                id="edit-photo-upload"
+                                                type="file"
+                                                accept="image/*"
+                                                style={{ display: 'none' }}
+                                                onChange={handlePhotoUpload}
+                                            />
+                                        </label>
+                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>Max 2MB · JPG, PNG, WEBP</p>
                                     </div>
-                                )}
+                                </div>
                             </div>
 
                             <div className="form-group">
