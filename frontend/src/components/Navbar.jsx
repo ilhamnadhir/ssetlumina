@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FiHome, FiBook, FiUsers, FiFileText, FiLogOut, FiSettings, FiSun, FiMoon } from 'react-icons/fi';
+import { FiHome, FiBook, FiUsers, FiFileText, FiLogOut, FiSettings, FiSun, FiMoon, FiUser } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
 import './Navbar.css';
 
@@ -61,6 +61,12 @@ const Navbar = () => {
                         <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
                             <FiSettings />
                             <span>Admin</span>
+                        </Link>
+                    )}
+                    {!isAdmin() && user && (
+                        <Link to="/profile" className={`nav-link ${isActive('/profile') ? 'active' : ''}`}>
+                            <FiUser />
+                            <span>My Profile</span>
                         </Link>
                     )}
                 </div>

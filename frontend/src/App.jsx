@@ -10,6 +10,7 @@ import PublicationDetail from './pages/PublicationDetail';
 import FacultyDirectory from './pages/FacultyDirectory';
 import FacultyProfile from './pages/FacultyProfile';
 import AdminDashboard from './pages/AdminDashboard';
+import MyProfile from './pages/MyProfile';
 import './index.css';
 
 function App() {
@@ -69,6 +70,15 @@ function App() {
               <>
                 <Navbar />
                 <FacultyProfile />
+              </>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <>
+                <Navbar />
+                <MyProfile />
               </>
             </ProtectedRoute>
           } />
