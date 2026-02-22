@@ -1,13 +1,14 @@
 ﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { publicationsAPI, departmentsAPI } from '../services/api';
+import { publicationsAPI } from '../services/api';
 import { FiSearch, FiFilter, FiPlus } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
+import { useData } from '../context/DataContext';
 
 const Publications = () => {
     const navigate = useNavigate();
     const [publications, setPublications] = useState([]);
-    const [departments, setDepartments] = useState([]);
+    const { departments } = useData();
     const [filters, setFilters] = useState({ department: '', type: '', year: '', academicYear: '', search: '' });
     const [loading, setLoading] = useState(true);
     const { isFaculty } = useAuth();
@@ -18,12 +19,8 @@ const Publications = () => {
 
     const fetchData = async () => {
         try {
-            const [pubsRes, deptsRes] = await Promise.all([
-                publicationsAPI.getAll(filters),
-                departmentsAPI.getAll()
-            ]);
+            const pubsRes = await publicationsAPI.getAll(filters);
             setPublications(pubsRes.data.publications);
-            setDepartments(deptsRes.data.departments);
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {

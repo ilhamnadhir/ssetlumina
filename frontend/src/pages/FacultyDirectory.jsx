@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { facultyAPI, departmentsAPI } from '../services/api';
+import { facultyAPI } from '../services/api';
 import { FiSearch } from 'react-icons/fi';
+import { useData } from '../context/DataContext';
 
 const FacultyDirectory = () => {
     const [faculty, setFaculty] = useState([]);
-    const [departments, setDepartments] = useState([]);
+    const { departments } = useData();
     const [filters, setFilters] = useState({ department: '', role: '', search: '', sortBy: 'name' });
     const [loading, setLoading] = useState(true);
 
@@ -15,12 +16,8 @@ const FacultyDirectory = () => {
 
     const fetchData = async () => {
         try {
-            const [facultyRes, deptsRes] = await Promise.all([
-                facultyAPI.getAll(filters),
-                departmentsAPI.getAll()
-            ]);
+            const facultyRes = await facultyAPI.getAll(filters);
             setFaculty(facultyRes.data.faculty);
-            setDepartments(deptsRes.data.departments);
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {

@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { adminAPI, departmentsAPI, facultyAPI } from '../services/api';
+import { adminAPI, facultyAPI } from '../services/api';
 import { FiUsers, FiFileText, FiBook, FiTrendingUp } from 'react-icons/fi';
+import { useData } from '../context/DataContext';
 import useCountUp from '../hooks/useCountUp';
 import './Home.css';
 
 const Home = () => {
     const [stats, setStats] = useState(null);
-    const [departments, setDepartments] = useState([]);
+    const { departments } = useData();
     const [recentFaculty, setRecentFaculty] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -23,15 +24,13 @@ const Home = () => {
 
     const fetchData = async () => {
         try {
-            const [statsRes, deptsRes, facultyRes] = await Promise.all([
+            const [statsRes, facultyRes] = await Promise.all([
                 adminAPI.getStats(),
-                departmentsAPI.getAll(),
-                facultyAPI.getAll({ sortBy: 'createdAt', order: 'desc' })
+                facultyAPI.getAll({ sortBy: 'createdAt', order: 'desc', limit: 6, minimal: true })
             ]);
 
             setStats(statsRes.data.overview);
-            setDepartments(deptsRes.data.departments);
-            setRecentFaculty(facultyRes.data.faculty.slice(0, 6));
+            setRecentFaculty(facultyRes.data.faculty);
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {

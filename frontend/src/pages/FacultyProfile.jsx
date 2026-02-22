@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { facultyAPI, publicationsAPI, departmentsAPI } from '../services/api';
+import { facultyAPI, publicationsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useData } from '../context/DataContext';
 import { FiMail, FiPhone, FiBook, FiAward, FiPlus, FiX, FiEdit, FiTrash2, FiCamera } from 'react-icons/fi';
 
 // Helper function to convert Google Drive links to direct image URLs
@@ -33,8 +34,7 @@ const FacultyProfile = () => {
     const { user } = useAuth();
     const [faculty, setFaculty] = useState(null);
     const [publications, setPublications] = useState([]);
-    const [departments, setDepartments] = useState([]);
-    const [allFaculty, setAllFaculty] = useState([]);
+    const { departments, facultyList: allFaculty } = useData();
     const [filters, setFilters] = useState({ type: '', year: '', academicYear: '' });
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -116,21 +116,19 @@ const FacultyProfile = () => {
 
     const fetchData = async () => {
         try {
-            const [facultyRes, pubsRes, deptsRes, allFacRes] = await Promise.all([
+            // Only fetch data specific to this profile
+            const [facultyRes, pubsRes] = await Promise.all([
                 facultyAPI.getById(id),
-                publicationsAPI.getByFaculty(id, filters),
-                departmentsAPI.getAll(),
-                facultyAPI.getAll()
+                publicationsAPI.getByFaculty(id, filters)
             ]);
+
             setFaculty(facultyRes.data.faculty);
             setPublications(pubsRes.data.publications);
-            setDepartments(deptsRes.data.departments);
-            setAllFaculty(allFacRes.data.faculty);
 
-            if (deptsRes.data.departments.length > 0) {
+            if (facultyRes.data.faculty) {
                 setFormData(prev => ({
                     ...prev,
-                    department: facultyRes.data.faculty.department._id,
+                    department: facultyRes.data.faculty.department?._id || '',
                     authors: [facultyRes.data.faculty._id]
                 }));
             }

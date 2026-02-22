@@ -26,8 +26,16 @@ router.get('/', async (req, res) => {
         const sortOrder = order === 'desc' ? -1 : 1;
         const sortOptions = { [sortBy]: sortOrder };
 
+        // Support minimal data fetching for dropdowns/selects
+        const { minimal } = req.query;
+        let selectFields = '';
+        if (minimal === 'true') {
+            selectFields = 'name facultyId email department profilePhoto';
+        }
+
         const faculty = await Faculty.find(query)
-            .populate('department')
+            .select(selectFields)
+            .populate('department', 'name code')
             .populate('publicationCount')
             .sort(sortOptions);
 
