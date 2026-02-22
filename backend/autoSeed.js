@@ -4,10 +4,17 @@ import Department from './models/Department.js';
 import Publication from './models/Publication.js';
 
 const departments = [
-    { name: 'B.Tech-CSE', code: 'CS', description: 'Department of Computer Science and Engineering', established: 1990 },
-    { name: 'B.Tech-ECE', code: 'ECE', description: 'Department of Electronics and Communication Engineering', established: 1985 },
-    { name: 'B.Tech-ME', code: 'ME', description: 'Department of Mechanical Engineering', established: 1980 },
-    { name: 'B.Tech-CE', code: 'CE', description: 'Department of Civil Engineering', established: 1975 }
+    { name: 'M.Tech-EE', code: 'MTEEE', description: 'M.Tech - Electrical Engineering', established: 2010 },
+    { name: 'M.Tech-CSE', code: 'MTCSE', description: 'M.Tech - Computer Science and Engineering', established: 2012 },
+    { name: 'MCA', code: 'MCA', description: 'Master of Computer Applications', established: 2005 },
+    { name: 'B.Tech-CSE', code: 'BTCSE', description: 'B.Tech - Computer Science and Engineering', established: 1990 },
+    { name: 'B.Tech-AI&DS', code: 'BTAIDS', description: 'B.Tech - Artificial Intelligence and Data Science', established: 2020 },
+    { name: 'B.Tech-ECE', code: 'BTECE', description: 'B.Tech - Electronics and Communication Engineering', established: 1985 },
+    { name: 'B.Tech-ECE(VLSI)', code: 'BTECEV', description: 'B.Tech - ECE (VLSI)', established: 2021 },
+    { name: 'B.Tech-EEE', code: 'BTEEE', description: 'B.Tech - Electrical and Electronics Engineering', established: 1995 },
+    { name: 'B.Tech-ME', code: 'BTME', description: 'B.Tech - Mechanical Engineering', established: 1980 },
+    { name: 'B.Tech-AU', code: 'BTAU', description: 'B.Tech - Automobile Engineering', established: 2008 },
+    { name: 'B.Tech-CE', code: 'BTCE', description: 'B.Tech - Civil Engineering', established: 1975 }
 ];
 
 export async function autoSeedIfEmpty() {

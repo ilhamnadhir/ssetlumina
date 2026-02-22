@@ -171,7 +171,7 @@ const AdminDashboard = () => {
                         <div className="section-card mt-lg">
                             <h2>Publications by Department</h2>
                             <div className="grid grid-2 gap-md mt-lg">
-                                {stats?.departmentStats.map((dept) => (
+                                {stats?.departmentStats.slice(0, 4).map((dept) => (
                                     <div key={dept._id} className="card">
                                         <h4>{dept.departmentName}</h4>
                                         <p className="text-muted mb-sm">{dept.departmentCode}</p>

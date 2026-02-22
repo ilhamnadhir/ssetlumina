@@ -87,7 +87,7 @@ const Home = () => {
                             <Link to="/departments" className="btn btn-sm btn-outline">View All</Link>
                         </div>
                         <div className="departments-list">
-                            {departments.map((dept) => (
+                            {departments.slice(0, 4).map((dept) => (
                                 <Link to={`/departments?dept=${dept._id}`} key={dept._id} className="department-item">
                                     <div className="department-info">
                                         <h3>{dept.name}</h3>
