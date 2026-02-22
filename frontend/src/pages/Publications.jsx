@@ -42,59 +42,70 @@ const Publications = () => {
                 </div>
 
                 <div className="section-card mb-lg">
-                    <div className="flex gap-md" style={{ flexWrap: 'wrap' }}>
-                        <div className="search-bar" style={{ flex: '1', minWidth: '250px' }}>
-                            <FiSearch className="search-icon" />
-                            <input
-                                type="text"
-                                className="search-input"
-                                placeholder="Search publications..."
-                                value={filters.search}
-                                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                            />
+                    <div className="flex gap-md items-end" style={{ flexWrap: 'wrap' }}>
+                        <div className="form-group mb-0" style={{ flex: '1', minWidth: '300px' }}>
+                            <label className="form-label">Search</label>
+                            <div className="search-bar">
+                                <FiSearch className="search-icon" />
+                                <input
+                                    type="text"
+                                    className="search-input"
+                                    placeholder="Title, author, DOI, ISSN, ISBN..."
+                                    value={filters.search}
+                                    onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                                />
+                            </div>
                         </div>
 
-                        <select
-                            className="form-select"
-                            value={filters.type}
-                            onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-                            style={{ width: '150px' }}
-                        >
-                            <option value="">All Types</option>
-                            <option value="journal">Journal</option>
-                            <option value="conference">Conference</option>
-                        </select>
+                        <div className="form-group mb-0">
+                            <label className="form-label">Type</label>
+                            <select
+                                className="form-select"
+                                value={filters.type}
+                                onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+                                style={{ width: '150px' }}
+                            >
+                                <option value="">All Types</option>
+                                <option value="journal">Journal</option>
+                                <option value="conference">Conference</option>
+                            </select>
+                        </div>
 
-                        <select
-                            className="form-select"
-                            value={filters.academicYear}
-                            onChange={(e) => setFilters({ ...filters, academicYear: e.target.value })}
-                            style={{ width: '180px' }}
-                        >
-                            <option value="">Academic Year</option>
-                            {Array.from({ length: 10 }, (_, i) => {
-                                const startYear = new Date().getFullYear() - 5 + i;
-                                const endYear = (startYear + 1).toString().slice(-2);
-                                const fullEndYear = startYear + 1;
-                                return (
-                                    <option key={startYear} value={`${startYear}-${endYear}`}>
-                                        June {startYear} - May {fullEndYear}
-                                    </option>
-                                );
-                            })}
-                        </select>
+                        <div className="form-group mb-0">
+                            <label className="form-label">Academic Year</label>
+                            <select
+                                className="form-select"
+                                value={filters.academicYear}
+                                onChange={(e) => setFilters({ ...filters, academicYear: e.target.value })}
+                                style={{ width: '180px' }}
+                            >
+                                <option value="">Select Year</option>
+                                {Array.from({ length: 10 }, (_, i) => {
+                                    const startYear = new Date().getFullYear() - 5 + i;
+                                    const endYear = (startYear + 1).toString().slice(-2);
+                                    return (
+                                        <option key={startYear} value={`${startYear}-${endYear}`}>
+                                            {startYear}-{endYear} (June-May)
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        </div>
 
-                        <select
-                            className="form-select"
-                            value={filters.department}
-                            onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-                            style={{ width: '200px' }}
-                        >
-                            <option value="">All Departments</option>
-                            {departments.map(dept => (
-                                <option key={dept._id} value={dept._id}>{dept.name}</option>
-                            ))}
-                        </select>
+                        <div className="form-group mb-0">
+                            <label className="form-label">Department</label>
+                            <select
+                                className="form-select"
+                                value={filters.department}
+                                onChange={(e) => setFilters({ ...filters, department: e.target.value })}
+                                style={{ width: '200px' }}
+                            >
+                                <option value="">All Departments</option>
+                                {departments.map(dept => (
+                                    <option key={dept._id} value={dept._id}>{dept.name}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                 </div>
 

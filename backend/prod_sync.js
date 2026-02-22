@@ -69,7 +69,12 @@ async function sync() {
         const publications = await Publication.find({});
         let pubCount = 0;
         for (const pub of publications) {
-            // Re-saving triggers the pre-save hook in Publication.js
+            // Force population of authorNames if missing
+            if (pub.authors && pub.authors.length > 0 && !pub.authorNames) {
+                const facultyDocs = await Faculty.find({ _id: { $in: pub.authors } }).select('name');
+                pub.authorNames = facultyDocs.map(f => f.name).join(', ');
+            }
+            // Re-saving triggers the pre-save hook for academicYear and yearStr
             await pub.save();
             pubCount++;
         }

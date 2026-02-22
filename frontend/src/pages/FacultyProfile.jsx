@@ -429,40 +429,45 @@ const FacultyProfile = () => {
                 <div className="section-card">
                     <div className="flex justify-between items-center mb-lg">
                         <h2>Publications ({publications.length})</h2>
-                        <div className="flex gap-sm">
+                        <div className="flex gap-sm items-end" style={{ flexWrap: 'wrap' }}>
                             {isOwnProfile && (
                                 <button className="btn btn-primary" onClick={handleAddPublication}>
                                     <FiPlus /> Add Publication
                                 </button>
                             )}
-                            <select
-                                className="form-select"
-                                value={filters.academicYear}
-                                onChange={(e) => setFilters({ ...filters, academicYear: e.target.value })}
-                                style={{ width: '180px' }}
-                            >
-                                <option value="">Academic Year</option>
-                                {Array.from({ length: 10 }, (_, i) => {
-                                    const startYear = new Date().getFullYear() - 5 + i;
-                                    const endYear = (startYear + 1).toString().slice(-2);
-                                    const fullEndYear = startYear + 1;
-                                    return (
-                                        <option key={startYear} value={`${startYear}-${endYear}`}>
-                                            June {startYear} - May {fullEndYear}
-                                        </option>
-                                    );
-                                })}
-                            </select>
-                            <select
-                                className="form-select"
-                                value={filters.type}
-                                onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-                                style={{ width: '150px' }}
-                            >
-                                <option value="">All Types</option>
-                                <option value="journal">Journal</option>
-                                <option value="conference">Conference</option>
-                            </select>
+                            <div className="form-group mb-0">
+                                <label className="form-label" style={{ fontSize: '0.75rem' }}>Academic Year</label>
+                                <select
+                                    className="form-select"
+                                    value={filters.academicYear}
+                                    onChange={(e) => setFilters({ ...filters, academicYear: e.target.value })}
+                                    style={{ width: '160px', padding: '0.5rem' }}
+                                >
+                                    <option value="">Select Year</option>
+                                    {Array.from({ length: 10 }, (_, i) => {
+                                        const startYear = new Date().getFullYear() - 5 + i;
+                                        const endYear = (startYear + 1).toString().slice(-2);
+                                        return (
+                                            <option key={startYear} value={`${startYear}-${endYear}`}>
+                                                {startYear}-{endYear} (June-May)
+                                            </option>
+                                        );
+                                    })}
+                                </select>
+                            </div>
+                            <div className="form-group mb-0">
+                                <label className="form-label" style={{ fontSize: '0.75rem' }}>Type</label>
+                                <select
+                                    className="form-select"
+                                    value={filters.type}
+                                    onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+                                    style={{ width: '130px', padding: '0.5rem' }}
+                                >
+                                    <option value="">All Types</option>
+                                    <option value="journal">Journal</option>
+                                    <option value="conference">Conference</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 

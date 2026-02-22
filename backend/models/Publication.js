@@ -190,8 +190,8 @@ const publicationSchema = new mongoose.Schema({
 // Pre-save middleware to calculate academicYear, dateForFilter, and yearStr
 publicationSchema.pre('save', async function (next) {
     // --- Support for incremental search ---
-    // Handle authorNames population if possible
-    if (this.authors && this.authors.length > 0 && this.isModified('authors')) {
+    // Handle authorNames population if missing or modified
+    if (this.authors && this.authors.length > 0 && (this.isModified('authors') || !this.authorNames)) {
         try {
             const Faculty = mongoose.model('Faculty');
             const facultyDocs = await Faculty.find({ _id: { $in: this.authors } }).select('name');
@@ -201,7 +201,7 @@ publicationSchema.pre('save', async function (next) {
         }
     }
 
-    if (this.year) {
+    if (this.year && (this.isModified('year') || !this.yearStr)) {
         this.yearStr = this.year.toString();
     }
 
