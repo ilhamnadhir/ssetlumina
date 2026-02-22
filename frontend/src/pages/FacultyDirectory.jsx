@@ -3,16 +3,18 @@ import { Link } from 'react-router-dom';
 import { facultyAPI } from '../services/api';
 import { FiSearch } from 'react-icons/fi';
 import { useData } from '../context/DataContext';
+import useDebounce from '../hooks/useDebounce';
 
 const FacultyDirectory = () => {
     const [faculty, setFaculty] = useState([]);
     const { departments } = useData();
     const [filters, setFilters] = useState({ department: '', role: '', search: '', sortBy: 'name' });
+    const debouncedSearch = useDebounce(filters.search, 500);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchData();
-    }, [filters]);
+    }, [filters.department, filters.role, filters.sortBy, debouncedSearch]);
 
     const fetchData = async () => {
         try {

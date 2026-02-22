@@ -12,6 +12,12 @@ const publicationSchema = new mongoose.Schema({
         enum: ['journal', 'conference'],
         required: true
     },
+    authorNames: {
+        // Cached string of faculty names for fast searching
+        type: String,
+        trim: true,
+        index: true
+    },
 
     // --- Common optional fields ---
     authors: [{
@@ -182,8 +188,19 @@ const publicationSchema = new mongoose.Schema({
 });
 
 // Pre-save middleware to calculate academicYear, dateForFilter, and yearStr
-publicationSchema.pre('save', function (next) {
-    // Handle yearStr for text indexing
+publicationSchema.pre('save', async function (next) {
+    // --- Support for incremental search ---
+    // Handle authorNames population if possible
+    if (this.authors && this.authors.length > 0 && this.isModified('authors')) {
+        try {
+            const Faculty = mongoose.model('Faculty');
+            const facultyDocs = await Faculty.find({ _id: { $in: this.authors } }).select('name');
+            this.authorNames = facultyDocs.map(f => f.name).join(', ');
+        } catch (err) {
+            console.error('Error populating authorNames preview:', err);
+        }
+    }
+
     if (this.year) {
         this.yearStr = this.year.toString();
     }
@@ -208,10 +225,9 @@ publicationSchema.pre('save', function (next) {
             console.error('Error calculating academic year:', err);
         }
     } else if (this.year && !this.academicYear) {
-        // Fallback for legacy data with only year: assume it matches calendar year mostly or just leave academicYear blank
-        // To be safe, let's not guess academic year for legacy data if we only have year number
         this.yearStr = this.year.toString();
     }
+
     next();
 });
 

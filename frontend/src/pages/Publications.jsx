@@ -4,18 +4,20 @@ import { publicationsAPI } from '../services/api';
 import { FiSearch, FiFilter, FiPlus } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
+import useDebounce from '../hooks/useDebounce';
 
 const Publications = () => {
     const navigate = useNavigate();
     const [publications, setPublications] = useState([]);
     const { departments } = useData();
     const [filters, setFilters] = useState({ department: '', type: '', year: '', academicYear: '', search: '' });
+    const debouncedSearch = useDebounce(filters.search, 500);
     const [loading, setLoading] = useState(true);
     const { isFaculty } = useAuth();
 
     useEffect(() => {
         fetchData();
-    }, [filters]);
+    }, [filters.department, filters.type, filters.year, filters.academicYear, debouncedSearch]);
 
     const fetchData = async () => {
         try {

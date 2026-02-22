@@ -19,7 +19,20 @@ router.get('/', async (req, res) => {
         if (author) query.authors = author;
 
         if (search) {
-            query.$text = { $search: search };
+            const searchRegex = new RegExp(search, 'i');
+            query.$or = [
+                { title: searchRegex },
+                { abstract: searchRegex },
+                { authorNames: searchRegex },
+                { coAuthors: searchRegex },
+                { doi: searchRegex },
+                { issn: searchRegex },
+                { isbn: searchRegex },
+                { journalName: searchRegex },
+                { conferenceName: searchRegex },
+                { academicYear: searchRegex },
+                { yearStr: searchRegex }
+            ];
         }
 
         const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -73,7 +86,20 @@ router.get('/faculty/:facultyId', async (req, res) => {
         if (year) query.year = parseInt(year);
         if (academicYear) query.academicYear = academicYear;
         if (search) {
-            query.$text = { $search: search };
+            const searchRegex = new RegExp(search, 'i');
+            query.$or = [
+                { title: searchRegex },
+                { abstract: searchRegex },
+                { authorNames: searchRegex },
+                { coAuthors: searchRegex },
+                { doi: searchRegex },
+                { issn: searchRegex },
+                { isbn: searchRegex },
+                { journalName: searchRegex },
+                { conferenceName: searchRegex },
+                { academicYear: searchRegex },
+                { yearStr: searchRegex }
+            ];
         }
 
         const publications = await Publication.find(query)

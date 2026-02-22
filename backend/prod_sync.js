@@ -73,7 +73,7 @@ async function sync() {
             await pub.save();
             pubCount++;
         }
-        console.log(`✅ Refreshed ${pubCount} publications with academic years and search strings.`);
+        console.log(`✅ Refreshed ${pubCount} publications with academic years, author names, and search strings.`);
 
         console.log('\n--- 3. Rebuilding Search Indexes ---');
         try {
