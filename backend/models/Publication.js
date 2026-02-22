@@ -1,45 +1,94 @@
 import mongoose from 'mongoose';
 
 const publicationSchema = new mongoose.Schema({
+    // --- Required ---
     title: {
         type: String,
         required: true,
         trim: true
     },
-    authors: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Faculty',
-        required: true
-    }],
     type: {
         type: String,
         enum: ['journal', 'conference'],
         required: true
     },
-    year: {
-        type: Number,
-        required: true,
-        min: 1900,
-        max: new Date().getFullYear() + 1
+
+    // --- Common optional fields ---
+    authors: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Faculty'
+    }],
+    coAuthors: {
+        // Free-text list of co-author names (non-faculty / external)
+        type: String,
+        trim: true
     },
     department: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Department',
-        required: true
-    },
-    abstract: {
-        type: String,
-        trim: true
+        ref: 'Department'
     },
     doi: {
         type: String,
         trim: true
     },
-    venue: {
+    publishedDate: {
+        // Stored as dd/mm/yyyy string as entered by user
         type: String,
-        required: true,
         trim: true
     },
+    indexing: [{
+        type: String,
+        trim: true
+    }],
+    abstract: {
+        type: String,
+        trim: true
+    },
+    keywords: [{
+        type: String,
+        trim: true
+    }],
+
+    // --- Journal-specific fields ---
+    journalName: {
+        type: String,
+        trim: true
+    },
+    paymentType: {
+        type: String,
+        enum: ['unpaid', 'paid', ''],
+        default: ''
+    },
+    paperLink: {
+        type: String,
+        trim: true
+    },
+    journalWebsiteLink: {
+        type: String,
+        trim: true
+    },
+    journalType: {
+        type: String,
+        enum: ['international', 'national', ''],
+        default: ''
+    },
+    printJournalContentLink: {
+        type: String,
+        trim: true
+    },
+    issn: {
+        type: String,
+        trim: true
+    },
+    impactFactor: {
+        type: Number,
+        min: 0
+    },
+    affiliation: {
+        type: String,
+        trim: true
+    },
+    // Journal optional extras
     volume: {
         type: String,
         trim: true
@@ -52,7 +101,47 @@ const publicationSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    publisher: {
+
+    // --- Conference/Book/Book-Paper specific fields ---
+    conferenceSubtype: {
+        // The specific category within 'conference' type
+        type: String,
+        enum: ['conference', 'book', 'book-paper', ''],
+        default: ''
+    },
+    conferenceType: {
+        // International or national
+        type: String,
+        enum: ['international', 'national', ''],
+        default: ''
+    },
+    conferenceName: {
+        type: String,
+        trim: true
+    },
+    proceedingsTitle: {
+        type: String,
+        trim: true
+    },
+    isbn: {
+        type: String,
+        trim: true
+    },
+    nameOfPublisher: {
+        type: String,
+        trim: true
+    },
+    firstPageLink: {
+        type: String,
+        trim: true
+    },
+
+    // --- Legacy / kept for backwards compat ---
+    venue: {
+        type: String,
+        trim: true
+    },
+    venueUrl: {
         type: String,
         trim: true
     },
@@ -60,50 +149,16 @@ const publicationSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    keywords: [{
-        type: String,
-        trim: true
-    }],
-    // Common fields
-    publishedDate: {
-        type: Date
-    },
-    venueUrl: {
+    publisher: {
         type: String,
         trim: true
     },
-    affiliation: {
-        type: String,
-        trim: true
-    },
-    indexing: [{
-        type: String,
-        trim: true
-    }],
-    // Journal-specific fields
-    journalType: {
-        type: String,
-        enum: ['international', 'national', ''],
-        default: ''
-    },
-    issn: {
-        type: String,
-        trim: true
-    },
-    impactFactor: {
+    year: {
         type: Number,
-        min: 0
+        min: 1900,
+        max: new Date().getFullYear() + 1
     },
-    // Conference-specific fields
-    conferenceType: {
-        type: String,
-        enum: ['conference', 'book', 'book-chapter', ''],
-        default: ''
-    },
-    isbn: {
-        type: String,
-        trim: true
-    },
+
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -114,8 +169,7 @@ const publicationSchema = new mongoose.Schema({
 });
 
 // Indexes for efficient searching
-publicationSchema.index({ title: 'text', abstract: 'text', venue: 'text' });
-publicationSchema.index({ year: -1 });
+publicationSchema.index({ title: 'text', abstract: 'text', journalName: 'text', conferenceName: 'text', proceedingsTitle: 'text' });
 publicationSchema.index({ type: 1 });
 publicationSchema.index({ department: 1 });
 

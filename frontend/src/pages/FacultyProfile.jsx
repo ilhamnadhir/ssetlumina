@@ -52,30 +52,42 @@ const FacultyProfile = () => {
     });
     const [showEditPubModal, setShowEditPubModal] = useState(false);
     const [editingPub, setEditingPub] = useState(null);
-    const [editPubData, setEditPubData] = useState({
-        title: '',
-        type: 'journal',
-        year: new Date().getFullYear(),
-        venue: '',
-        abstract: '',
-        doi: '',
-        volume: '',
-        issue: '',
-        pages: ''
-    });
-    const [formData, setFormData] = useState({
+
+    const emptyPubForm = {
         title: '',
         authors: [],
         type: 'journal',
-        year: new Date().getFullYear(),
         department: '',
-        venue: '',
         abstract: '',
         doi: '',
+        // Journal fields
+        journalName: '',
+        coAuthors: '',
+        paymentType: '',
+        publishedDate: '',
+        paperLink: '',
+        journalWebsiteLink: '',
+        journalType: '',
+        printJournalContentLink: '',
+        indexing: '',
+        issn: '',
+        impactFactor: '',
+        affiliation: '',
         volume: '',
         issue: '',
-        pages: ''
-    });
+        pages: '',
+        // Conference / Book fields
+        conferenceSubtype: 'conference',
+        conferenceType: '',
+        conferenceName: '',
+        proceedingsTitle: '',
+        isbn: '',
+        nameOfPublisher: '',
+        firstPageLink: '',
+    };
+
+    const [formData, setFormData] = useState({ ...emptyPubForm });
+    const [editPubData, setEditPubData] = useState({ ...emptyPubForm });
 
     // Check if this is the logged-in user's own profile
     // Note: login response uses 'id' not '_id', so check both
@@ -131,17 +143,9 @@ const FacultyProfile = () => {
 
     const handleAddPublication = () => {
         setFormData({
-            title: '',
+            ...emptyPubForm,
             authors: [faculty._id],
-            type: 'journal',
-            year: new Date().getFullYear(),
             department: faculty.department._id,
-            venue: '',
-            abstract: '',
-            doi: '',
-            volume: '',
-            issue: '',
-            pages: ''
         });
         setShowModal(true);
     };
@@ -158,7 +162,13 @@ const FacultyProfile = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await publicationsAPI.create(formData);
+            const dataToSubmit = {
+                ...formData,
+                indexing: typeof formData.indexing === 'string'
+                    ? formData.indexing.split(',').map(i => i.trim()).filter(Boolean)
+                    : formData.indexing
+            };
+            await publicationsAPI.create(dataToSubmit);
             setShowModal(false);
             fetchData(); // Refresh publications list
         } catch (error) {
@@ -170,15 +180,36 @@ const FacultyProfile = () => {
         e.stopPropagation();
         setEditingPub(pub);
         setEditPubData({
-            title: pub.title,
-            type: pub.type,
-            year: pub.year,
-            venue: pub.venue || '',
+            ...emptyPubForm,
+            title: pub.title || '',
+            type: pub.type || 'journal',
+            department: pub.department?._id || pub.department || '',
             abstract: pub.abstract || '',
             doi: pub.doi || '',
+            // Journal
+            journalName: pub.journalName || '',
+            coAuthors: pub.coAuthors || '',
+            paymentType: pub.paymentType || '',
+            publishedDate: pub.publishedDate || '',
+            paperLink: pub.paperLink || '',
+            journalWebsiteLink: pub.journalWebsiteLink || '',
+            journalType: pub.journalType || '',
+            printJournalContentLink: pub.printJournalContentLink || '',
+            indexing: Array.isArray(pub.indexing) ? pub.indexing.join(', ') : (pub.indexing || ''),
+            issn: pub.issn || '',
+            impactFactor: pub.impactFactor || '',
+            affiliation: pub.affiliation || '',
             volume: pub.volume || '',
             issue: pub.issue || '',
-            pages: pub.pages || ''
+            pages: pub.pages || '',
+            // Conference
+            conferenceSubtype: pub.conferenceSubtype || 'conference',
+            conferenceType: pub.conferenceType || '',
+            conferenceName: pub.conferenceName || '',
+            proceedingsTitle: pub.proceedingsTitle || '',
+            isbn: pub.isbn || '',
+            nameOfPublisher: pub.nameOfPublisher || '',
+            firstPageLink: pub.firstPageLink || '',
         });
         setShowEditPubModal(true);
     };
@@ -186,7 +217,13 @@ const FacultyProfile = () => {
     const handleEditPubSubmit = async (e) => {
         e.preventDefault();
         try {
-            await publicationsAPI.update(editingPub._id, editPubData);
+            const dataToSubmit = {
+                ...editPubData,
+                indexing: typeof editPubData.indexing === 'string'
+                    ? editPubData.indexing.split(',').map(i => i.trim()).filter(Boolean)
+                    : editPubData.indexing
+            };
+            await publicationsAPI.update(editingPub._id, dataToSubmit);
             setShowEditPubModal(false);
             setEditingPub(null);
             fetchData();
@@ -454,7 +491,15 @@ const FacultyProfile = () => {
                                         )}
                                     </div>
                                 </div>
-                                <p className="text-secondary mb-sm">{pub.venue} • {pub.year}</p>
+                                <p className="text-secondary mb-sm">
+                                    {pub.type === 'journal' ? (pub.journalName || pub.venue || '') : (pub.conferenceName || pub.venue || '')}
+                                    {pub.publishedDate && ` • ${pub.publishedDate}`}
+                                </p>
+                                {pub.conferenceSubtype && pub.type === 'conference' && (
+                                    <span className="badge badge-success" style={{ fontSize: '0.7rem', textTransform: 'capitalize', marginBottom: '0.5rem', display: 'inline-block' }}>
+                                        {pub.conferenceSubtype === 'book-paper' ? 'Book Paper' : pub.conferenceSubtype}
+                                    </span>
+                                )}
                                 {pub.abstract && (
                                     <p className="text-muted" style={{ fontSize: '0.875rem' }}>
                                         {pub.abstract.substring(0, 150)}...
@@ -475,7 +520,7 @@ const FacultyProfile = () => {
             {/* Edit Publication Modal */}
             {showEditPubModal && editingPub && (
                 <div className="modal-overlay" onClick={() => setShowEditPubModal(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px' }}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '740px', maxHeight: '90vh', overflowY: 'auto' }}>
                         <div className="flex justify-between items-center mb-lg">
                             <h3>Edit Publication</h3>
                             <button onClick={() => setShowEditPubModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '1.5rem' }}>
@@ -484,35 +529,207 @@ const FacultyProfile = () => {
                         </div>
 
                         <form onSubmit={handleEditPubSubmit}>
+                            {/* Type selector */}
+                            <div className="form-group">
+                                <label className="form-label">Category *</label>
+                                <div className="flex gap-md mb-md">
+                                    {[{ val: 'journal', label: '📰 Journal' }, { val: 'conference', label: '📚 Conference / Book / Book Paper' }].map(opt => (
+                                        <label key={opt.val} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.75rem 1rem', border: `2px solid ${editPubData.type === opt.val ? 'var(--primary)' : 'var(--border)'}`, borderRadius: 'var(--radius-md)', flex: 1, background: editPubData.type === opt.val ? 'var(--primary-light, color-mix(in srgb, var(--primary) 12%, transparent))' : 'transparent', fontWeight: editPubData.type === opt.val ? 600 : 400 }}>
+                                            <input type="radio" name="editType" value={opt.val} checked={editPubData.type === opt.val} onChange={() => setEditPubData({ ...editPubData, type: opt.val })} style={{ display: 'none' }} />
+                                            {opt.label}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
                             <div className="form-group">
                                 <label className="form-label">Title *</label>
                                 <input type="text" className="form-input" value={editPubData.title}
                                     onChange={(e) => setEditPubData({ ...editPubData, title: e.target.value })} required />
                             </div>
 
-                            <div className="grid grid-2 gap-md">
-                                <div className="form-group">
-                                    <label className="form-label">Type *</label>
-                                    <select className="form-select" value={editPubData.type}
-                                        onChange={(e) => setEditPubData({ ...editPubData, type: e.target.value })} required>
-                                        <option value="journal">Journal</option>
-                                        <option value="conference">Conference</option>
-                                    </select>
-                                </div>
-                                <div className="form-group">
-                                    <label className="form-label">Year *</label>
-                                    <input type="number" className="form-input" value={editPubData.year}
-                                        onChange={(e) => setEditPubData({ ...editPubData, year: parseInt(e.target.value) })}
-                                        min="1900" max={new Date().getFullYear() + 1} required />
-                                </div>
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">Venue *</label>
-                                <input type="text" className="form-input" value={editPubData.venue}
-                                    onChange={(e) => setEditPubData({ ...editPubData, venue: e.target.value })}
-                                    placeholder="Journal/Conference name" required />
-                            </div>
+                            {editPubData.type === 'journal' ? (
+                                <>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Journal Name</label>
+                                            <input type="text" className="form-input" value={editPubData.journalName}
+                                                onChange={(e) => setEditPubData({ ...editPubData, journalName: e.target.value })} placeholder="e.g. Nature, IEEE Access" />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Co-Authors</label>
+                                            <input type="text" className="form-input" value={editPubData.coAuthors}
+                                                onChange={(e) => setEditPubData({ ...editPubData, coAuthors: e.target.value })} placeholder="External co-author names" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Payment Type</label>
+                                            <select className="form-select" value={editPubData.paymentType}
+                                                onChange={(e) => setEditPubData({ ...editPubData, paymentType: e.target.value })}>
+                                                <option value="">Select</option>
+                                                <option value="unpaid">Unpaid / Open Access</option>
+                                                <option value="paid">Paid</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Date of Publication</label>
+                                            <input type="text" className="form-input" value={editPubData.publishedDate}
+                                                onChange={(e) => setEditPubData({ ...editPubData, publishedDate: e.target.value })} placeholder="dd/mm/yyyy" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Paper Link</label>
+                                            <input type="url" className="form-input" value={editPubData.paperLink}
+                                                onChange={(e) => setEditPubData({ ...editPubData, paperLink: e.target.value })} placeholder="https://..." />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Journal Website Link</label>
+                                            <input type="url" className="form-input" value={editPubData.journalWebsiteLink}
+                                                onChange={(e) => setEditPubData({ ...editPubData, journalWebsiteLink: e.target.value })} placeholder="https://..." />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Journal Type</label>
+                                            <select className="form-select" value={editPubData.journalType}
+                                                onChange={(e) => setEditPubData({ ...editPubData, journalType: e.target.value })}>
+                                                <option value="">Select</option>
+                                                <option value="international">International</option>
+                                                <option value="national">National</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">ISSN</label>
+                                            <input type="text" className="form-input" value={editPubData.issn}
+                                                onChange={(e) => setEditPubData({ ...editPubData, issn: e.target.value })} placeholder="XXXX-XXXX" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">DOI</label>
+                                            <input type="text" className="form-input" value={editPubData.doi}
+                                                onChange={(e) => setEditPubData({ ...editPubData, doi: e.target.value })} placeholder="10.xxxx/xxxx" />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Impact Factor</label>
+                                            <input type="number" step="0.001" className="form-input" value={editPubData.impactFactor}
+                                                onChange={(e) => setEditPubData({ ...editPubData, impactFactor: e.target.value })} placeholder="e.g. 4.21" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Print Journal Content Page Link</label>
+                                            <input type="url" className="form-input" value={editPubData.printJournalContentLink}
+                                                onChange={(e) => setEditPubData({ ...editPubData, printJournalContentLink: e.target.value })} placeholder="https://..." />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Indexing (comma-separated)</label>
+                                            <input type="text" className="form-input" value={editPubData.indexing}
+                                                onChange={(e) => setEditPubData({ ...editPubData, indexing: e.target.value })} placeholder="Scopus, Web of Science..." />
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Affiliation</label>
+                                        <input type="text" className="form-input" value={editPubData.affiliation}
+                                            onChange={(e) => setEditPubData({ ...editPubData, affiliation: e.target.value })} placeholder="Institution name as published" />
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Volume</label>
+                                            <input type="text" className="form-input" value={editPubData.volume}
+                                                onChange={(e) => setEditPubData({ ...editPubData, volume: e.target.value })} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Issue</label>
+                                            <input type="text" className="form-input" value={editPubData.issue}
+                                                onChange={(e) => setEditPubData({ ...editPubData, issue: e.target.value })} />
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Pages</label>
+                                        <input type="text" className="form-input" value={editPubData.pages}
+                                            onChange={(e) => setEditPubData({ ...editPubData, pages: e.target.value })} placeholder="e.g. 123-145" />
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Sub-type *</label>
+                                            <select className="form-select" value={editPubData.conferenceSubtype}
+                                                onChange={(e) => setEditPubData({ ...editPubData, conferenceSubtype: e.target.value })} required>
+                                                <option value="conference">Conference</option>
+                                                <option value="book">Book</option>
+                                                <option value="book-paper">Book Paper</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Conference Type</label>
+                                            <select className="form-select" value={editPubData.conferenceType}
+                                                onChange={(e) => setEditPubData({ ...editPubData, conferenceType: e.target.value })}>
+                                                <option value="">Select</option>
+                                                <option value="international">International</option>
+                                                <option value="national">National</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Name of Conference / Book</label>
+                                            <input type="text" className="form-input" value={editPubData.conferenceName}
+                                                onChange={(e) => setEditPubData({ ...editPubData, conferenceName: e.target.value })} placeholder="Full conference/book name" />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Proceedings Title</label>
+                                            <input type="text" className="form-input" value={editPubData.proceedingsTitle}
+                                                onChange={(e) => setEditPubData({ ...editPubData, proceedingsTitle: e.target.value })} placeholder="Proceedings of..." />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Co-Authors</label>
+                                            <input type="text" className="form-input" value={editPubData.coAuthors}
+                                                onChange={(e) => setEditPubData({ ...editPubData, coAuthors: e.target.value })} placeholder="External co-author names" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Date of Publishing</label>
+                                            <input type="text" className="form-input" value={editPubData.publishedDate}
+                                                onChange={(e) => setEditPubData({ ...editPubData, publishedDate: e.target.value })} placeholder="dd/mm/yyyy" />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">ISBN</label>
+                                            <input type="text" className="form-input" value={editPubData.isbn}
+                                                onChange={(e) => setEditPubData({ ...editPubData, isbn: e.target.value })} placeholder="978-X-XXXX-XXXX-X" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">DOI</label>
+                                            <input type="text" className="form-input" value={editPubData.doi}
+                                                onChange={(e) => setEditPubData({ ...editPubData, doi: e.target.value })} placeholder="10.xxxx/xxxx" />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Name of Publisher</label>
+                                            <input type="text" className="form-input" value={editPubData.nameOfPublisher}
+                                                onChange={(e) => setEditPubData({ ...editPubData, nameOfPublisher: e.target.value })} placeholder="e.g. Springer, Elsevier" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Link to First Page</label>
+                                            <input type="url" className="form-input" value={editPubData.firstPageLink}
+                                                onChange={(e) => setEditPubData({ ...editPubData, firstPageLink: e.target.value })} placeholder="https://..." />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Indexing (comma-separated)</label>
+                                            <input type="text" className="form-input" value={editPubData.indexing}
+                                                onChange={(e) => setEditPubData({ ...editPubData, indexing: e.target.value })} placeholder="Scopus, DBLP..." />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
 
                             <div className="form-group">
                                 <label className="form-label">Abstract</label>
@@ -520,36 +737,6 @@ const FacultyProfile = () => {
                                     onChange={(e) => setEditPubData({ ...editPubData, abstract: e.target.value })}
                                     placeholder="Publication abstract..." />
                             </div>
-
-                            <div className="grid grid-2 gap-md">
-                                <div className="form-group">
-                                    <label className="form-label">DOI</label>
-                                    <input type="text" className="form-input" value={editPubData.doi}
-                                        onChange={(e) => setEditPubData({ ...editPubData, doi: e.target.value })}
-                                        placeholder="10.1234/example" />
-                                </div>
-                                <div className="form-group">
-                                    <label className="form-label">Pages</label>
-                                    <input type="text" className="form-input" value={editPubData.pages}
-                                        onChange={(e) => setEditPubData({ ...editPubData, pages: e.target.value })}
-                                        placeholder="123-145" />
-                                </div>
-                            </div>
-
-                            {editPubData.type === 'journal' && (
-                                <div className="grid grid-2 gap-md">
-                                    <div className="form-group">
-                                        <label className="form-label">Volume</label>
-                                        <input type="text" className="form-input" value={editPubData.volume}
-                                            onChange={(e) => setEditPubData({ ...editPubData, volume: e.target.value })} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Issue</label>
-                                        <input type="text" className="form-input" value={editPubData.issue}
-                                            onChange={(e) => setEditPubData({ ...editPubData, issue: e.target.value })} />
-                                    </div>
-                                </div>
-                            )}
 
                             <div className="flex gap-md">
                                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Save Changes</button>
@@ -563,7 +750,7 @@ const FacultyProfile = () => {
             {/* Add Publication Modal */}
             {showModal && (
                 <div className="modal-overlay" onClick={() => setShowModal(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px' }}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '740px', maxHeight: '90vh', overflowY: 'auto' }}>
                         <div className="flex justify-between items-center mb-lg">
                             <h3>Add Publication</h3>
                             <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '1.5rem' }}>
@@ -572,20 +759,221 @@ const FacultyProfile = () => {
                         </div>
 
                         <form onSubmit={handleSubmit}>
+                            {/* Category selector */}
                             <div className="form-group">
-                                <label className="form-label">Title *</label>
-                                <input
-                                    type="text"
-                                    className="form-input"
-                                    value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    required
-                                />
+                                <label className="form-label">Category *</label>
+                                <div className="flex gap-md mb-md">
+                                    {[{ val: 'journal', label: '📰 Journal' }, { val: 'conference', label: '📚 Conference / Book / Book Paper' }].map(opt => (
+                                        <label key={opt.val} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.75rem 1rem', border: `2px solid ${formData.type === opt.val ? 'var(--primary)' : 'var(--border)'}`, borderRadius: 'var(--radius-md)', flex: 1, background: formData.type === opt.val ? 'var(--primary-light, color-mix(in srgb, var(--primary) 12%, transparent))' : 'transparent', fontWeight: formData.type === opt.val ? 600 : 400 }}>
+                                            <input type="radio" name="addType" value={opt.val} checked={formData.type === opt.val} onChange={() => setFormData({ ...formData, type: opt.val })} style={{ display: 'none' }} />
+                                            {opt.label}
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Co-Authors (Select additional authors)</label>
-                                <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-sm)' }}>
+                                <label className="form-label">Title *</label>
+                                <input type="text" className="form-input" value={formData.title}
+                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
+                            </div>
+
+                            {formData.type === 'journal' ? (
+                                <>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Journal Name</label>
+                                            <input type="text" className="form-input" value={formData.journalName}
+                                                onChange={(e) => setFormData({ ...formData, journalName: e.target.value })} placeholder="e.g. Nature, IEEE Access" />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Co-Authors</label>
+                                            <input type="text" className="form-input" value={formData.coAuthors}
+                                                onChange={(e) => setFormData({ ...formData, coAuthors: e.target.value })} placeholder="External co-author names" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Payment Type</label>
+                                            <select className="form-select" value={formData.paymentType}
+                                                onChange={(e) => setFormData({ ...formData, paymentType: e.target.value })}>
+                                                <option value="">Select</option>
+                                                <option value="unpaid">Unpaid / Open Access</option>
+                                                <option value="paid">Paid</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Date of Publication</label>
+                                            <input type="text" className="form-input" value={formData.publishedDate}
+                                                onChange={(e) => setFormData({ ...formData, publishedDate: e.target.value })} placeholder="dd/mm/yyyy" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Paper Link</label>
+                                            <input type="url" className="form-input" value={formData.paperLink}
+                                                onChange={(e) => setFormData({ ...formData, paperLink: e.target.value })} placeholder="https://..." />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Journal Website Link</label>
+                                            <input type="url" className="form-input" value={formData.journalWebsiteLink}
+                                                onChange={(e) => setFormData({ ...formData, journalWebsiteLink: e.target.value })} placeholder="https://..." />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Journal Type</label>
+                                            <select className="form-select" value={formData.journalType}
+                                                onChange={(e) => setFormData({ ...formData, journalType: e.target.value })}>
+                                                <option value="">Select</option>
+                                                <option value="international">International</option>
+                                                <option value="national">National</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">ISSN</label>
+                                            <input type="text" className="form-input" value={formData.issn}
+                                                onChange={(e) => setFormData({ ...formData, issn: e.target.value })} placeholder="XXXX-XXXX" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">DOI</label>
+                                            <input type="text" className="form-input" value={formData.doi}
+                                                onChange={(e) => setFormData({ ...formData, doi: e.target.value })} placeholder="10.xxxx/xxxx" />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Impact Factor</label>
+                                            <input type="number" step="0.001" className="form-input" value={formData.impactFactor}
+                                                onChange={(e) => setFormData({ ...formData, impactFactor: e.target.value })} placeholder="e.g. 4.21" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Print Journal Content Page Link</label>
+                                            <input type="url" className="form-input" value={formData.printJournalContentLink}
+                                                onChange={(e) => setFormData({ ...formData, printJournalContentLink: e.target.value })} placeholder="https://..." />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Indexing (comma-separated)</label>
+                                            <input type="text" className="form-input" value={formData.indexing}
+                                                onChange={(e) => setFormData({ ...formData, indexing: e.target.value })} placeholder="Scopus, Web of Science..." />
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Affiliation</label>
+                                        <input type="text" className="form-input" value={formData.affiliation}
+                                            onChange={(e) => setFormData({ ...formData, affiliation: e.target.value })} placeholder="Institution name as published" />
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Volume</label>
+                                            <input type="text" className="form-input" value={formData.volume}
+                                                onChange={(e) => setFormData({ ...formData, volume: e.target.value })} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Issue</label>
+                                            <input type="text" className="form-input" value={formData.issue}
+                                                onChange={(e) => setFormData({ ...formData, issue: e.target.value })} />
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Pages</label>
+                                        <input type="text" className="form-input" value={formData.pages}
+                                            onChange={(e) => setFormData({ ...formData, pages: e.target.value })} placeholder="e.g. 123-145" />
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Sub-type *</label>
+                                            <select className="form-select" value={formData.conferenceSubtype}
+                                                onChange={(e) => setFormData({ ...formData, conferenceSubtype: e.target.value })} required>
+                                                <option value="conference">Conference</option>
+                                                <option value="book">Book</option>
+                                                <option value="book-paper">Book Paper</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Conference Type</label>
+                                            <select className="form-select" value={formData.conferenceType}
+                                                onChange={(e) => setFormData({ ...formData, conferenceType: e.target.value })}>
+                                                <option value="">Select</option>
+                                                <option value="international">International</option>
+                                                <option value="national">National</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Name of Conference / Book</label>
+                                            <input type="text" className="form-input" value={formData.conferenceName}
+                                                onChange={(e) => setFormData({ ...formData, conferenceName: e.target.value })} placeholder="Full conference/book name" />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Proceedings Title</label>
+                                            <input type="text" className="form-input" value={formData.proceedingsTitle}
+                                                onChange={(e) => setFormData({ ...formData, proceedingsTitle: e.target.value })} placeholder="Proceedings of..." />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Co-Authors</label>
+                                            <input type="text" className="form-input" value={formData.coAuthors}
+                                                onChange={(e) => setFormData({ ...formData, coAuthors: e.target.value })} placeholder="External co-author names" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Date of Publishing</label>
+                                            <input type="text" className="form-input" value={formData.publishedDate}
+                                                onChange={(e) => setFormData({ ...formData, publishedDate: e.target.value })} placeholder="dd/mm/yyyy" />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">ISBN</label>
+                                            <input type="text" className="form-input" value={formData.isbn}
+                                                onChange={(e) => setFormData({ ...formData, isbn: e.target.value })} placeholder="978-X-XXXX-XXXX-X" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">DOI</label>
+                                            <input type="text" className="form-input" value={formData.doi}
+                                                onChange={(e) => setFormData({ ...formData, doi: e.target.value })} placeholder="10.xxxx/xxxx" />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Name of Publisher</label>
+                                            <input type="text" className="form-input" value={formData.nameOfPublisher}
+                                                onChange={(e) => setFormData({ ...formData, nameOfPublisher: e.target.value })} placeholder="e.g. Springer, Elsevier" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-2 gap-md">
+                                        <div className="form-group">
+                                            <label className="form-label">Link to First Page</label>
+                                            <input type="url" className="form-input" value={formData.firstPageLink}
+                                                onChange={(e) => setFormData({ ...formData, firstPageLink: e.target.value })} placeholder="https://..." />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Indexing (comma-separated)</label>
+                                            <input type="text" className="form-input" value={formData.indexing}
+                                                onChange={(e) => setFormData({ ...formData, indexing: e.target.value })} placeholder="Scopus, DBLP..." />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            <div className="form-group">
+                                <label className="form-label">Abstract</label>
+                                <textarea className="form-textarea" value={formData.abstract}
+                                    onChange={(e) => setFormData({ ...formData, abstract: e.target.value })}
+                                    placeholder="Publication abstract..." />
+                            </div>
+
+                            {/* Optional: additional faculty authors */}
+                            <details style={{ marginBottom: 'var(--spacing-md)' }}>
+                                <summary style={{ cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
+                                    + Add Faculty Co-Authors (optional)
+                                </summary>
+                                <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-sm)', marginTop: '0.5rem' }}>
                                     {allFaculty.map(fac => (
                                         <label key={fac._id} style={{ display: 'block', padding: 'var(--spacing-xs)', cursor: 'pointer' }}>
                                             <input
@@ -598,105 +986,7 @@ const FacultyProfile = () => {
                                         </label>
                                     ))}
                                 </div>
-                            </div>
-
-                            <div className="grid grid-2 gap-md">
-                                <div className="form-group">
-                                    <label className="form-label">Type *</label>
-                                    <select
-                                        className="form-select"
-                                        value={formData.type}
-                                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                                        required
-                                    >
-                                        <option value="journal">Journal</option>
-                                        <option value="conference">Conference</option>
-                                    </select>
-                                </div>
-
-                                <div className="form-group">
-                                    <label className="form-label">Year *</label>
-                                    <input
-                                        type="number"
-                                        className="form-input"
-                                        value={formData.year}
-                                        onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
-                                        min="1900"
-                                        max={new Date().getFullYear() + 1}
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">Venue *</label>
-                                <input
-                                    type="text"
-                                    className="form-input"
-                                    value={formData.venue}
-                                    onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
-                                    placeholder="Journal/Conference name"
-                                    required
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">Abstract</label>
-                                <textarea
-                                    className="form-textarea"
-                                    value={formData.abstract}
-                                    onChange={(e) => setFormData({ ...formData, abstract: e.target.value })}
-                                    placeholder="Publication abstract..."
-                                />
-                            </div>
-
-                            <div className="grid grid-2 gap-md">
-                                <div className="form-group">
-                                    <label className="form-label">DOI</label>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        value={formData.doi}
-                                        onChange={(e) => setFormData({ ...formData, doi: e.target.value })}
-                                        placeholder="10.1234/example"
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label className="form-label">Pages</label>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        value={formData.pages}
-                                        onChange={(e) => setFormData({ ...formData, pages: e.target.value })}
-                                        placeholder="123-145"
-                                    />
-                                </div>
-                            </div>
-
-                            {formData.type === 'journal' && (
-                                <div className="grid grid-2 gap-md">
-                                    <div className="form-group">
-                                        <label className="form-label">Volume</label>
-                                        <input
-                                            type="text"
-                                            className="form-input"
-                                            value={formData.volume}
-                                            onChange={(e) => setFormData({ ...formData, volume: e.target.value })}
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label className="form-label">Issue</label>
-                                        <input
-                                            type="text"
-                                            className="form-input"
-                                            value={formData.issue}
-                                            onChange={(e) => setFormData({ ...formData, issue: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                            )}
+                            </details>
 
                             <div className="flex gap-md">
                                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>

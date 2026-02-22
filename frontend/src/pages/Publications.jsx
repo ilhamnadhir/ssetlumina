@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { publicationsAPI, departmentsAPI } from '../services/api';
 import { FiSearch, FiFilter, FiPlus } from 'react-icons/fi';
@@ -101,16 +101,16 @@ const Publications = () => {
                                 <h3 style={{ margin: 0, flex: 1 }}>{pub.title}</h3>
                                 <div className="flex gap-xs" style={{ flexWrap: 'wrap', flexShrink: 0 }}>
                                     <span className={`badge ${pub.type === 'journal' ? 'badge-primary' : 'badge-success'}`}>
-                                        {pub.type}
+                                        {pub.type === 'journal' ? 'Journal' : 'Conference / Book'}
                                     </span>
-                                    {pub.journalType && (
+                                    {pub.conferenceSubtype && (
                                         <span className="badge badge-success" style={{ textTransform: 'capitalize' }}>
-                                            {pub.journalType}
+                                            {pub.conferenceSubtype === 'book-paper' ? 'Book Paper' : pub.conferenceSubtype}
                                         </span>
                                     )}
-                                    {pub.conferenceType && (
+                                    {(pub.journalType || pub.conferenceType) && (
                                         <span className="badge badge-success" style={{ textTransform: 'capitalize' }}>
-                                            {pub.conferenceType.replace('-', ' ')}
+                                            {pub.journalType || pub.conferenceType}
                                         </span>
                                     )}
                                 </div>
@@ -118,13 +118,17 @@ const Publications = () => {
 
                             {/* Authors */}
                             <p className="text-muted mb-sm" style={{ fontSize: '0.9rem' }}>
-                                <strong>Authors:</strong> {pub.authors.map(a => a.name).join(', ')}
+                                <strong>Authors:</strong>{' '}
+                                {pub.authors?.map(a => a.name).join(', ')}
+                                {pub.coAuthors ? (pub.authors?.length ? `, ${pub.coAuthors}` : pub.coAuthors) : ''}
                             </p>
 
-                            {/* Venue & Year */}
+                            {/* Venue & Date */}
                             <p className="text-secondary mb-md" style={{ fontSize: '1rem', fontWeight: 500 }}>
-                                {pub.venue} • {pub.year}
-                                {pub.publishedDate && ` • ${new Date(pub.publishedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}`}
+                                {pub.type === 'journal'
+                                    ? (pub.journalName || pub.venue || '')
+                                    : (pub.conferenceName || pub.venue || '')}
+                                {pub.publishedDate && ` • ${pub.publishedDate}`}
                             </p>
 
                             {/* Metadata Grid */}
@@ -166,11 +170,21 @@ const Publications = () => {
                                 )}
 
                                 {/* Conference-specific metadata */}
-                                {pub.type === 'conference' && pub.isbn && (
-                                    <div>
-                                        <div className="text-muted" style={{ fontSize: '0.7rem', marginBottom: '0.25rem' }}>ISBN</div>
-                                        <div className="text-secondary" style={{ fontSize: '0.9rem', fontFamily: 'monospace' }}>{pub.isbn}</div>
-                                    </div>
+                                {pub.type === 'conference' && (
+                                    <>
+                                        {pub.proceedingsTitle && (
+                                            <div>
+                                                <div className="text-muted" style={{ fontSize: '0.7rem', marginBottom: '0.25rem' }}>Proceedings</div>
+                                                <div className="text-secondary" style={{ fontSize: '0.9rem', fontStyle: 'italic' }}>{pub.proceedingsTitle}</div>
+                                            </div>
+                                        )}
+                                        {pub.isbn && (
+                                            <div>
+                                                <div className="text-muted" style={{ fontSize: '0.7rem', marginBottom: '0.25rem' }}>ISBN</div>
+                                                <div className="text-secondary" style={{ fontSize: '0.9rem', fontFamily: 'monospace' }}>{pub.isbn}</div>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
 
                                 {/* Common metadata */}
@@ -180,10 +194,10 @@ const Publications = () => {
                                         <div className="text-secondary" style={{ fontSize: '0.9rem' }}>{pub.pages}</div>
                                     </div>
                                 )}
-                                {pub.publisher && (
+                                {(pub.nameOfPublisher || pub.publisher) && (
                                     <div>
                                         <div className="text-muted" style={{ fontSize: '0.7rem', marginBottom: '0.25rem' }}>Publisher</div>
-                                        <div className="text-secondary" style={{ fontSize: '0.9rem' }}>{pub.publisher}</div>
+                                        <div className="text-secondary" style={{ fontSize: '0.9rem' }}>{pub.nameOfPublisher || pub.publisher}</div>
                                     </div>
                                 )}
                                 {pub.doi && (

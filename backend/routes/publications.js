@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
         const publications = await Publication.find(query)
             .populate('authors', 'name facultyId department')
             .populate('department', 'name code')
-            .sort({ year: -1, createdAt: -1 })
+            .sort({ createdAt: -1 })
             .skip(skip)
             .limit(parseInt(limit));
 
@@ -77,7 +77,7 @@ router.get('/faculty/:facultyId', async (req, res) => {
         const publications = await Publication.find(query)
             .populate('authors', 'name facultyId')
             .populate('department', 'name code')
-            .sort({ year: -1 });
+            .sort({ createdAt: -1 });
 
         res.json({ publications, count: publications.length });
     } catch (error) {
@@ -89,11 +89,17 @@ router.get('/faculty/:facultyId', async (req, res) => {
 router.post('/', authenticate, async (req, res) => {
     try {
         const {
-            title, authors, type, year, department, abstract, doi, venue,
-            volume, issue, pages, publisher, url, keywords,
-            publishedDate, venueUrl, affiliation, indexing,
-            journalType, issn, impactFactor,
-            conferenceType, isbn
+            title, type, authors, coAuthors, department,
+            doi, publishedDate, indexing, abstract, keywords,
+            // Journal fields
+            journalName, paymentType, paperLink, journalWebsiteLink,
+            journalType, issn, impactFactor, affiliation,
+            volume, issue, pages,
+            // Conference/Book fields
+            conferenceSubtype, conferenceType, conferenceName, proceedingsTitle,
+            isbn, nameOfPublisher, firstPageLink,
+            // Legacy
+            venue, venueUrl, url, publisher, year
         } = req.body;
 
         // Get user's faculty profile
@@ -105,35 +111,48 @@ router.post('/', authenticate, async (req, res) => {
                 return res.status(403).json({ message: 'Faculty profile not found' });
             }
 
-            if (!authors.includes(userFaculty._id.toString())) {
+            if (authors && authors.length > 0 && !authors.includes(userFaculty._id.toString())) {
                 return res.status(403).json({ message: 'You can only add publications where you are an author' });
             }
         }
 
         const publication = new Publication({
             title,
-            authors,
             type,
-            year,
+            authors: authors || [],
+            coAuthors,
             department,
-            abstract,
             doi,
-            venue,
+            publishedDate,
+            indexing,
+            abstract,
+            keywords,
+            // Journal
+            journalName,
+            paymentType,
+            paperLink,
+            journalWebsiteLink,
+            journalType,
+            issn,
+            impactFactor: impactFactor ? parseFloat(impactFactor) : undefined,
+            affiliation,
             volume,
             issue,
             pages,
-            publisher,
-            url,
-            keywords,
-            publishedDate,
-            venueUrl,
-            affiliation,
-            indexing,
-            journalType,
-            issn,
-            impactFactor,
+            // Conference/Book
+            conferenceSubtype,
             conferenceType,
+            conferenceName,
+            proceedingsTitle,
             isbn,
+            nameOfPublisher,
+            firstPageLink,
+            // Legacy
+            venue,
+            venueUrl,
+            url,
+            publisher,
+            year,
             createdBy: req.user._id
         });
 
@@ -170,36 +189,52 @@ router.put('/:id', authenticate, async (req, res) => {
         }
 
         const {
-            title, authors, type, year, department, abstract, doi, venue,
-            volume, issue, pages, publisher, url, keywords,
-            publishedDate, venueUrl, affiliation, indexing,
-            journalType, issn, impactFactor,
-            conferenceType, isbn
+            title, type, authors, coAuthors, department,
+            doi, publishedDate, indexing, abstract, keywords,
+            journalName, paymentType, paperLink, journalWebsiteLink,
+            journalType, issn, impactFactor, affiliation,
+            volume, issue, pages,
+            conferenceSubtype, conferenceType, conferenceName, proceedingsTitle,
+            isbn, nameOfPublisher, firstPageLink,
+            venue, venueUrl, url, publisher, year
         } = req.body;
 
-        if (title) publication.title = title;
-        if (authors) publication.authors = authors;
-        if (type) publication.type = type;
-        if (year) publication.year = year;
-        if (department) publication.department = department;
-        if (abstract) publication.abstract = abstract;
-        if (doi) publication.doi = doi;
-        if (venue) publication.venue = venue;
-        if (volume) publication.volume = volume;
-        if (issue) publication.issue = issue;
-        if (pages) publication.pages = pages;
-        if (publisher) publication.publisher = publisher;
-        if (url) publication.url = url;
-        if (keywords) publication.keywords = keywords;
+        if (title !== undefined) publication.title = title;
+        if (type !== undefined) publication.type = type;
+        if (authors !== undefined) publication.authors = authors;
+        if (coAuthors !== undefined) publication.coAuthors = coAuthors;
+        if (department !== undefined) publication.department = department;
+        if (doi !== undefined) publication.doi = doi;
         if (publishedDate !== undefined) publication.publishedDate = publishedDate;
-        if (venueUrl) publication.venueUrl = venueUrl;
-        if (affiliation) publication.affiliation = affiliation;
-        if (indexing) publication.indexing = indexing;
+        if (indexing !== undefined) publication.indexing = indexing;
+        if (abstract !== undefined) publication.abstract = abstract;
+        if (keywords !== undefined) publication.keywords = keywords;
+        // Journal
+        if (journalName !== undefined) publication.journalName = journalName;
+        if (paymentType !== undefined) publication.paymentType = paymentType;
+        if (paperLink !== undefined) publication.paperLink = paperLink;
+        if (journalWebsiteLink !== undefined) publication.journalWebsiteLink = journalWebsiteLink;
         if (journalType !== undefined) publication.journalType = journalType;
-        if (issn) publication.issn = issn;
-        if (impactFactor !== undefined) publication.impactFactor = impactFactor;
+        if (issn !== undefined) publication.issn = issn;
+        if (impactFactor !== undefined) publication.impactFactor = impactFactor ? parseFloat(impactFactor) : undefined;
+        if (affiliation !== undefined) publication.affiliation = affiliation;
+        if (volume !== undefined) publication.volume = volume;
+        if (issue !== undefined) publication.issue = issue;
+        if (pages !== undefined) publication.pages = pages;
+        // Conference/Book
+        if (conferenceSubtype !== undefined) publication.conferenceSubtype = conferenceSubtype;
         if (conferenceType !== undefined) publication.conferenceType = conferenceType;
-        if (isbn) publication.isbn = isbn;
+        if (conferenceName !== undefined) publication.conferenceName = conferenceName;
+        if (proceedingsTitle !== undefined) publication.proceedingsTitle = proceedingsTitle;
+        if (isbn !== undefined) publication.isbn = isbn;
+        if (nameOfPublisher !== undefined) publication.nameOfPublisher = nameOfPublisher;
+        if (firstPageLink !== undefined) publication.firstPageLink = firstPageLink;
+        // Legacy
+        if (venue !== undefined) publication.venue = venue;
+        if (venueUrl !== undefined) publication.venueUrl = venueUrl;
+        if (url !== undefined) publication.url = url;
+        if (publisher !== undefined) publication.publisher = publisher;
+        if (year !== undefined) publication.year = year;
 
         await publication.save();
 

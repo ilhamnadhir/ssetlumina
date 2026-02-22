@@ -27,14 +27,8 @@ const PublicationDetail = () => {
         }
     };
 
-    const formatDate = (date) => {
-        if (!date) return null;
-        return new Date(date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    };
+    // publishedDate is stored as a plain string (dd/mm/yyyy)
+    const formatDate = (date) => date || null;
 
     if (loading) {
         return <div className="loading-container"><div className="loader"></div></div>;
@@ -76,21 +70,26 @@ const PublicationDetail = () => {
                             <h1 style={{ marginBottom: '1rem' }}>{publication.title}</h1>
                             <div className="flex gap-sm" style={{ flexWrap: 'wrap' }}>
                                 <span className={`badge ${publication.type === 'journal' ? 'badge-primary' : 'badge-success'}`}>
-                                    {publication.type}
+                                    {publication.type === 'journal' ? 'Journal' : 'Conference / Book'}
                                 </span>
+                                {publication.conferenceSubtype && (
+                                    <span className="badge badge-success">
+                                        {publication.conferenceSubtype === 'book-paper' ? 'Book Paper' : publication.conferenceSubtype.charAt(0).toUpperCase() + publication.conferenceSubtype.slice(1)}
+                                    </span>
+                                )}
+                                {(publication.journalType || publication.conferenceType) && (
+                                    <span className="badge badge-success">
+                                        {(publication.journalType || publication.conferenceType).charAt(0).toUpperCase() + (publication.journalType || publication.conferenceType).slice(1)}
+                                    </span>
+                                )}
+                                {publication.paymentType && (
+                                    <span className="badge badge-primary">
+                                        {publication.paymentType === 'unpaid' ? 'Open Access' : 'Paid'}
+                                    </span>
+                                )}
                                 {publication.department && (
                                     <span className="badge badge-primary">
                                         {publication.department.name}
-                                    </span>
-                                )}
-                                {publication.journalType && (
-                                    <span className="badge badge-success">
-                                        {publication.journalType}
-                                    </span>
-                                )}
-                                {publication.conferenceType && (
-                                    <span className="badge badge-success">
-                                        {publication.conferenceType}
                                     </span>
                                 )}
                             </div>
@@ -98,24 +97,31 @@ const PublicationDetail = () => {
                     </div>
 
                     {/* Authors */}
-                    <div className="card mb-lg">
-                        <div className="flex items-center gap-sm mb-sm">
-                            <FiUsers className="text-primary" />
-                            <h3 style={{ margin: 0 }}>Authors</h3>
+                    {((publication.authors && publication.authors.length > 0) || publication.coAuthors) && (
+                        <div className="card mb-lg">
+                            <div className="flex items-center gap-sm mb-sm">
+                                <FiUsers className="text-primary" />
+                                <h3 style={{ margin: 0 }}>Authors</h3>
+                            </div>
+                            <div className="flex flex-column gap-xs">
+                                {publication.authors?.map((author) => (
+                                    <Link
+                                        key={author._id}
+                                        to={`/faculty/${author._id}`}
+                                        className="text-secondary"
+                                        style={{ textDecoration: 'none', fontSize: '1rem' }}
+                                    >
+                                        {author.name}
+                                    </Link>
+                                ))}
+                                {publication.coAuthors && (
+                                    <p className="text-secondary" style={{ margin: 0, fontSize: '1rem' }}>
+                                        {publication.coAuthors}
+                                    </p>
+                                )}
+                            </div>
                         </div>
-                        <div className="flex flex-column gap-xs">
-                            {publication.authors.map((author) => (
-                                <Link
-                                    key={author._id}
-                                    to={`/faculty/${author._id}`}
-                                    className="text-secondary"
-                                    style={{ textDecoration: 'none', fontSize: '1rem' }}
-                                >
-                                    {author.name}
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
+                    )}
 
                     {/* Journal-Specific Information */}
                     {isJournal && (
@@ -127,19 +133,13 @@ const PublicationDetail = () => {
                                     <h4 style={{ margin: 0 }}>Journal Information</h4>
                                 </div>
                                 <p className="text-secondary" style={{ marginBottom: '0.75rem', fontWeight: '500', fontSize: '1.05rem' }}>
-                                    {publication.venue}
+                                    {publication.journalName || publication.venue || '—'}
                                 </p>
                                 <div className="grid gap-xs" style={{ gridTemplateColumns: 'auto 1fr', fontSize: '0.875rem', rowGap: '0.5rem' }}>
                                     {publication.publishedDate && (
                                         <>
                                             <span className="text-muted">Published:</span>
-                                            <span className="text-secondary">{formatDate(publication.publishedDate)}</span>
-                                        </>
-                                    )}
-                                    {publication.year && (
-                                        <>
-                                            <span className="text-muted">Year:</span>
-                                            <span className="text-secondary">{publication.year}</span>
+                                            <span className="text-secondary">{publication.publishedDate}</span>
                                         </>
                                     )}
                                     {publication.volume && (
@@ -158,12 +158,6 @@ const PublicationDetail = () => {
                                         <>
                                             <span className="text-muted">Pages:</span>
                                             <span className="text-secondary">{publication.pages}</span>
-                                        </>
-                                    )}
-                                    {publication.publisher && (
-                                        <>
-                                            <span className="text-muted">Publisher:</span>
-                                            <span className="text-secondary">{publication.publisher}</span>
                                         </>
                                     )}
                                 </div>
@@ -190,6 +184,14 @@ const PublicationDetail = () => {
                                                 <p className="text-muted" style={{ fontSize: '0.7rem', margin: 0 }}>ISSN</p>
                                                 <p className="text-secondary" style={{ fontSize: '1.1rem', fontFamily: 'monospace', margin: '0.25rem 0' }}>
                                                     {publication.issn}
+                                                </p>
+                                            </div>
+                                        )}
+                                        {publication.affiliation && (
+                                            <div>
+                                                <p className="text-muted" style={{ fontSize: '0.7rem', margin: 0 }}>Affiliation</p>
+                                                <p className="text-secondary" style={{ margin: '0.25rem 0' }}>
+                                                    {publication.affiliation}
                                                 </p>
                                             </div>
                                         )}
@@ -223,34 +225,39 @@ const PublicationDetail = () => {
                             <div className="card">
                                 <div className="flex items-center gap-sm mb-sm">
                                     <FiBook className="text-primary" />
-                                    <h4 style={{ margin: 0 }}>Conference Information</h4>
+                                    <h4 style={{ margin: 0 }}>Conference / Book Information</h4>
                                 </div>
                                 <p className="text-secondary" style={{ marginBottom: '0.75rem', fontWeight: '500', fontSize: '1.05rem' }}>
-                                    {publication.venue}
+                                    {publication.conferenceName || publication.venue || '—'}
                                 </p>
+                                {publication.proceedingsTitle && (
+                                    <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem', fontStyle: 'italic' }}>
+                                        {publication.proceedingsTitle}
+                                    </p>
+                                )}
                                 <div className="grid gap-xs" style={{ gridTemplateColumns: 'auto 1fr', fontSize: '0.875rem', rowGap: '0.5rem' }}>
                                     {publication.publishedDate && (
                                         <>
                                             <span className="text-muted">Published:</span>
-                                            <span className="text-secondary">{formatDate(publication.publishedDate)}</span>
+                                            <span className="text-secondary">{publication.publishedDate}</span>
                                         </>
                                     )}
-                                    {publication.year && (
-                                        <>
-                                            <span className="text-muted">Year:</span>
-                                            <span className="text-secondary">{publication.year}</span>
-                                        </>
-                                    )}
-                                    {publication.publisher && (
+                                    {publication.nameOfPublisher && (
                                         <>
                                             <span className="text-muted">Publisher:</span>
-                                            <span className="text-secondary">{publication.publisher}</span>
+                                            <span className="text-secondary">{publication.nameOfPublisher}</span>
                                         </>
                                     )}
                                     {publication.pages && (
                                         <>
                                             <span className="text-muted">Pages:</span>
                                             <span className="text-secondary">{publication.pages}</span>
+                                        </>
+                                    )}
+                                    {publication.conferenceType && (
+                                        <>
+                                            <span className="text-muted">Type:</span>
+                                            <span className="text-secondary" style={{ textTransform: 'capitalize' }}>{publication.conferenceType}</span>
                                         </>
                                     )}
                                 </div>
@@ -288,15 +295,7 @@ const PublicationDetail = () => {
                         </div>
                     )}
 
-                    {/* Affiliation */}
-                    {publication.affiliation && (
-                        <div className="card mb-lg">
-                            <h4 style={{ marginBottom: '0.5rem' }}>Affiliation</h4>
-                            <p className="text-secondary" style={{ margin: 0 }}>
-                                {publication.affiliation}
-                            </p>
-                        </div>
-                    )}
+
 
                     {/* Abstract */}
                     {publication.abstract && (
@@ -345,9 +344,9 @@ const PublicationDetail = () => {
                                 View DOI <FiExternalLink />
                             </a>
                         )}
-                        {publication.url && (
+                        {(publication.paperLink || publication.url) && (
                             <a
-                                href={publication.url}
+                                href={publication.paperLink || publication.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="btn btn-secondary"
@@ -356,15 +355,37 @@ const PublicationDetail = () => {
                                 View Paper <FiExternalLink />
                             </a>
                         )}
-                        {publication.venueUrl && (
+                        {(publication.journalWebsiteLink || publication.venueUrl) && isJournal && (
                             <a
-                                href={publication.venueUrl}
+                                href={publication.journalWebsiteLink || publication.venueUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="btn btn-secondary"
                                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                             >
-                                View {isJournal ? 'Journal' : 'Conference'} Website <FiExternalLink />
+                                Journal Website <FiExternalLink />
+                            </a>
+                        )}
+                        {publication.printJournalContentLink && isJournal && (
+                            <a
+                                href={publication.printJournalContentLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-secondary"
+                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                            >
+                                Print Content <FiExternalLink />
+                            </a>
+                        )}
+                        {publication.firstPageLink && !isJournal && (
+                            <a
+                                href={publication.firstPageLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-secondary"
+                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                            >
+                                First Page <FiExternalLink />
                             </a>
                         )}
                     </div>
