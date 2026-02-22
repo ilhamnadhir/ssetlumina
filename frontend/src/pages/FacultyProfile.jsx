@@ -447,7 +447,12 @@ const FacultyProfile = () => {
                                 {Array.from({ length: 10 }, (_, i) => {
                                     const startYear = new Date().getFullYear() - 5 + i;
                                     const endYear = (startYear + 1).toString().slice(-2);
-                                    return <option key={startYear} value={`${startYear}-${endYear}`}>{`${startYear}-${endYear}`}</option>;
+                                    const fullEndYear = startYear + 1;
+                                    return (
+                                        <option key={startYear} value={`${startYear}-${endYear}`}>
+                                            June {startYear} - May {fullEndYear}
+                                        </option>
+                                    );
                                 })}
                             </select>
                             <select
