@@ -35,7 +35,7 @@ const FacultyProfile = () => {
     const [publications, setPublications] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [allFaculty, setAllFaculty] = useState([]);
-    const [filters, setFilters] = useState({ type: '', year: '' });
+    const [filters, setFilters] = useState({ type: '', year: '', academicYear: '' });
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
@@ -437,6 +437,19 @@ const FacultyProfile = () => {
                                     <FiPlus /> Add Publication
                                 </button>
                             )}
+                            <select
+                                className="form-select"
+                                value={filters.academicYear}
+                                onChange={(e) => setFilters({ ...filters, academicYear: e.target.value })}
+                                style={{ width: '180px' }}
+                            >
+                                <option value="">Academic Year</option>
+                                {Array.from({ length: 10 }, (_, i) => {
+                                    const startYear = new Date().getFullYear() - 5 + i;
+                                    const endYear = (startYear + 1).toString().slice(-2);
+                                    return <option key={startYear} value={`${startYear}-${endYear}`}>{`${startYear}-${endYear}`}</option>;
+                                })}
+                            </select>
                             <select
                                 className="form-select"
                                 value={filters.type}

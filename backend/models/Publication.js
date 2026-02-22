@@ -159,6 +159,19 @@ const publicationSchema = new mongoose.Schema({
         max: new Date().getFullYear() + 1
     },
 
+    academicYear: {
+        type: String, // e.g., "2025-26"
+        trim: true,
+        index: true
+    },
+    yearStr: {
+        type: String, // String version of year for text indexing
+        index: true
+    },
+    dateForFilter: {
+        type: Date,
+        index: true
+    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -168,8 +181,51 @@ const publicationSchema = new mongoose.Schema({
     timestamps: true
 });
 
+// Pre-save middleware to calculate academicYear, dateForFilter, and yearStr
+publicationSchema.pre('save', function (next) {
+    // Handle yearStr for text indexing
+    if (this.year) {
+        this.yearStr = this.year.toString();
+    }
+
+    if (this.publishedDate) {
+        try {
+            const [day, month, year] = this.publishedDate.split('/').map(Number);
+            if (day && month && year) {
+                const date = new Date(year, month - 1, day);
+                this.dateForFilter = date;
+
+                // Academic Year Logic: June (6) to May (5)
+                const academicStartYear = month >= 6 ? year : year - 1;
+                const academicEndYearString = (academicStartYear + 1).toString().slice(-2);
+                this.academicYear = `${academicStartYear}-${academicEndYearString}`;
+
+                // If year field is empty or mismatch, update it
+                this.year = year;
+                this.yearStr = year.toString();
+            }
+        } catch (err) {
+            console.error('Error calculating academic year:', err);
+        }
+    } else if (this.year && !this.academicYear) {
+        // Fallback for legacy data with only year: assume it matches calendar year mostly or just leave academicYear blank
+        // To be safe, let's not guess academic year for legacy data if we only have year number
+        this.yearStr = this.year.toString();
+    }
+    next();
+});
+
 // Indexes for efficient searching
-publicationSchema.index({ title: 'text', abstract: 'text', journalName: 'text', conferenceName: 'text', proceedingsTitle: 'text' });
+publicationSchema.index({
+    title: 'text',
+    abstract: 'text',
+    journalName: 'text',
+    conferenceName: 'text',
+    proceedingsTitle: 'text',
+    academicYear: 'text',
+    yearStr: 'text',
+    publishedDate: 'text'
+});
 publicationSchema.index({ type: 1 });
 publicationSchema.index({ department: 1 });
 

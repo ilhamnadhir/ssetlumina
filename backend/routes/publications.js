@@ -8,13 +8,14 @@ const router = express.Router();
 // Get all publications with search and filters
 router.get('/', async (req, res) => {
     try {
-        const { department, type, year, author, search, page = 1, limit = 20 } = req.query;
+        const { department, type, year, academicYear, author, search, page = 1, limit = 20 } = req.query;
 
         let query = {};
 
         if (department) query.department = department;
         if (type) query.type = type;
         if (year) query.year = parseInt(year);
+        if (academicYear) query.academicYear = academicYear;
         if (author) query.authors = author;
 
         if (search) {
@@ -64,12 +65,13 @@ router.get('/:id', async (req, res) => {
 // Get publications by faculty
 router.get('/faculty/:facultyId', async (req, res) => {
     try {
-        const { type, year, search } = req.query;
+        const { type, year, academicYear, search } = req.query;
 
         let query = { authors: req.params.facultyId };
 
         if (type) query.type = type;
         if (year) query.year = parseInt(year);
+        if (academicYear) query.academicYear = academicYear;
         if (search) {
             query.$text = { $search: search };
         }

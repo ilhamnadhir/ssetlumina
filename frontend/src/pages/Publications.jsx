@@ -8,7 +8,7 @@ const Publications = () => {
     const navigate = useNavigate();
     const [publications, setPublications] = useState([]);
     const [departments, setDepartments] = useState([]);
-    const [filters, setFilters] = useState({ department: '', type: '', year: '', search: '' });
+    const [filters, setFilters] = useState({ department: '', type: '', year: '', academicYear: '', search: '' });
     const [loading, setLoading] = useState(true);
     const { isFaculty } = useAuth();
 
@@ -64,6 +64,20 @@ const Publications = () => {
                             <option value="">All Types</option>
                             <option value="journal">Journal</option>
                             <option value="conference">Conference</option>
+                        </select>
+
+                        <select
+                            className="form-select"
+                            value={filters.academicYear}
+                            onChange={(e) => setFilters({ ...filters, academicYear: e.target.value })}
+                            style={{ width: '180px' }}
+                        >
+                            <option value="">Academic Year</option>
+                            {Array.from({ length: 10 }, (_, i) => {
+                                const startYear = new Date().getFullYear() - 5 + i;
+                                const endYear = (startYear + 1).toString().slice(-2);
+                                return <option key={startYear} value={`${startYear}-${endYear}`}>{`${startYear}-${endYear}`}</option>;
+                            })}
                         </select>
 
                         <select
