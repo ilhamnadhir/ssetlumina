@@ -1,5 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { FiHome, FiBook, FiUsers, FiFileText, FiLogOut, FiSettings, FiSun, FiMoon, FiUser, FiMenu, FiX } from 'react-icons/fi';
 import ssetLogo from '/logo-removebg-preview.png';
 import { useState, useEffect } from 'react';
@@ -8,9 +9,9 @@ import './Navbar.css';
 
 const Navbar = () => {
     const { user, logout, isAdmin } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
-    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
     const [menuOpen, setMenuOpen] = useState(false);
     const [myFacultyId, setMyFacultyId] = useState(null);
 
@@ -44,18 +45,11 @@ const Navbar = () => {
         setMenuOpen(false);
     }, [location.pathname]);
 
-    useEffect(() => {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-    }, [theme]);
-
     // Prevent body scroll when menu is open
     useEffect(() => {
         document.body.style.overflow = menuOpen ? 'hidden' : '';
         return () => { document.body.style.overflow = ''; };
     }, [menuOpen]);
-
-    const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
 
     const handleLogout = () => {
         logout();

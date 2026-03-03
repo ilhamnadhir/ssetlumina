@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import api from '../services/api';
-import { FiMail, FiLock, FiBook, FiUser, FiBriefcase, FiHash, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiMail, FiLock, FiBook, FiUser, FiBriefcase, FiHash, FiEye, FiEyeOff, FiSun, FiMoon } from 'react-icons/fi';
 import ssetLogo from '/logo-removebg-preview.png';
 import './Login.css';
 
 const Login = () => {
+    const { theme, toggleTheme } = useTheme();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -123,6 +125,14 @@ const Login = () => {
     return (
         <div className="login-container">
             <div className="login-background"></div>
+
+            <button
+                onClick={toggleTheme}
+                className="theme-toggle-login"
+                title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+                {theme === 'dark' ? <FiSun /> : <FiMoon />}
+            </button>
 
             <div className="login-card" style={isRegister ? { maxWidth: '600px' } : {}}>
                 <div className="login-header">

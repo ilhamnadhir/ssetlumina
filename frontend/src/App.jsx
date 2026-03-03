@@ -14,92 +14,95 @@ import MyProfile from './pages/MyProfile';
 import './index.css';
 
 import { DataProvider } from './context/DataContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
   return (
-    <AuthProvider>
-      <DataProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
+    <ThemeProvider>
+      <AuthProvider>
+        <DataProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<Login />} />
 
-            <Route path="/" element={
-              <ProtectedRoute>
-                <>
-                  <Navbar />
-                  <Home />
-                </>
-              </ProtectedRoute>
-            } />
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <>
+                    <Navbar />
+                    <Home />
+                  </>
+                </ProtectedRoute>
+              } />
 
-            <Route path="/departments" element={
-              <ProtectedRoute>
-                <>
-                  <Navbar />
-                  <Departments />
-                </>
-              </ProtectedRoute>
-            } />
+              <Route path="/departments" element={
+                <ProtectedRoute>
+                  <>
+                    <Navbar />
+                    <Departments />
+                  </>
+                </ProtectedRoute>
+              } />
 
-            <Route path="/publications" element={
-              <ProtectedRoute>
-                <>
-                  <Navbar />
-                  <Publications />
-                </>
-              </ProtectedRoute>
-            } />
+              <Route path="/publications" element={
+                <ProtectedRoute>
+                  <>
+                    <Navbar />
+                    <Publications />
+                  </>
+                </ProtectedRoute>
+              } />
 
-            <Route path="/publications/:id" element={
-              <ProtectedRoute>
-                <>
-                  <Navbar />
-                  <PublicationDetail />
-                </>
-              </ProtectedRoute>
-            } />
+              <Route path="/publications/:id" element={
+                <ProtectedRoute>
+                  <>
+                    <Navbar />
+                    <PublicationDetail />
+                  </>
+                </ProtectedRoute>
+              } />
 
-            <Route path="/faculty" element={
-              <ProtectedRoute>
-                <>
-                  <Navbar />
-                  <FacultyDirectory />
-                </>
-              </ProtectedRoute>
-            } />
+              <Route path="/faculty" element={
+                <ProtectedRoute>
+                  <>
+                    <Navbar />
+                    <FacultyDirectory />
+                  </>
+                </ProtectedRoute>
+              } />
 
-            <Route path="/faculty/:id" element={
-              <ProtectedRoute>
-                <>
-                  <Navbar />
-                  <FacultyProfile />
-                </>
-              </ProtectedRoute>
-            } />
+              <Route path="/faculty/:id" element={
+                <ProtectedRoute>
+                  <>
+                    <Navbar />
+                    <FacultyProfile />
+                  </>
+                </ProtectedRoute>
+              } />
 
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <>
-                  <Navbar />
-                  <MyProfile />
-                </>
-              </ProtectedRoute>
-            } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <>
+                    <Navbar />
+                    <MyProfile />
+                  </>
+                </ProtectedRoute>
+              } />
 
-            <Route path="/admin" element={
-              <ProtectedRoute adminOnly>
-                <>
-                  <Navbar />
-                  <AdminDashboard />
-                </>
-              </ProtectedRoute>
-            } />
+              <Route path="/admin" element={
+                <ProtectedRoute adminOnly>
+                  <>
+                    <Navbar />
+                    <AdminDashboard />
+                  </>
+                </ProtectedRoute>
+              } />
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </DataProvider>
-    </AuthProvider>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </DataProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

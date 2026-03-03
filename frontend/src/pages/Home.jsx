@@ -50,7 +50,7 @@ const Home = () => {
         <div className="home-page">
             <div className="container">
                 <div className="page-header">
-                    <h1>Faculty Publication Portal</h1>
+                    <h1>SSET Lumina</h1>
                 </div>
 
                 <div className="stats-grid">
@@ -106,7 +106,7 @@ const Home = () => {
                             <Link to="/faculty" className="btn btn-sm btn-outline">View All</Link>
                         </div>
                         <div className="faculty-grid">
-                            {recentFaculty.map((faculty) => (
+                            {recentFaculty.slice(0, 6).map((faculty) => (
                                 <Link to={`/faculty/${faculty._id}`} key={faculty._id} className="faculty-card-mini">
                                     <img
                                         src={faculty.profilePhoto || 'https://via.placeholder.com/100'}
