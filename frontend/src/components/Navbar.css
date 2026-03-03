@@ -33,9 +33,12 @@
     color: var(--primary-light);
 }
 
-.brand-icon {
-    font-size: 1.5rem;
-    color: var(--primary-light);
+.brand-logo-video {
+    height: 36px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    border-radius: 4px;
 }
 
 .navbar-links {

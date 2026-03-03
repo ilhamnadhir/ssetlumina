@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FiHome, FiBook, FiUsers, FiFileText, FiLogOut, FiSettings, FiSun, FiMoon, FiUser, FiMenu, FiX } from 'react-icons/fi';
+import ssetLogo from '/sset logo.mp4';
 import { useState, useEffect } from 'react';
 import { facultyAPI } from '../services/api';
 import './Navbar.css';
@@ -75,7 +76,7 @@ const Navbar = () => {
             <nav className="navbar">
                 <div className="navbar-container">
                     <Link to="/" className="navbar-brand">
-                        <FiBook className="brand-icon" />
+                        <video src={ssetLogo} autoPlay loop muted playsInline className="brand-logo-video" />
                         <span>SSET Lumina</span>
                     </Link>
 
@@ -116,7 +117,7 @@ const Navbar = () => {
             <div className={`mobile-menu ${menuOpen ? 'open' : ''}`}>
                 <div className="mobile-menu-header">
                     <Link to="/" className="navbar-brand" onClick={() => setMenuOpen(false)}>
-                        <FiBook className="brand-icon" />
+                        <video src={ssetLogo} autoPlay loop muted playsInline className="brand-logo-video" />
                         <span>SSET Lumina</span>
                     </Link>
                     <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }} onClick={() => setMenuOpen(false)}>
