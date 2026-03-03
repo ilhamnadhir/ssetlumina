@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { FiMail, FiLock, FiBook, FiUser, FiBriefcase, FiHash, FiEye, FiEyeOff } from 'react-icons/fi';
-import ssetLogo from '/sset logo.mp4';
+import ssetLogo from '/logo-removebg-preview.png';
 import './Login.css';
 
 const Login = () => {
@@ -126,7 +126,7 @@ const Login = () => {
 
             <div className="login-card" style={isRegister ? { maxWidth: '600px' } : {}}>
                 <div className="login-header">
-                    <video src={ssetLogo} autoPlay loop muted playsInline className="login-logo-video" />
+                    <img src={ssetLogo} alt="SSET Lumina Logo" className="login-logo-video" />
                     <h1>SSET Lumina</h1>
                     <p>{isRegister ? 'Create New Account' : 'Publication Management System'}</p>
                 </div>
