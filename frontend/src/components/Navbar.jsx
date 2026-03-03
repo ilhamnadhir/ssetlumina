@@ -76,7 +76,7 @@ const Navbar = () => {
                 <div className="navbar-container">
                     <Link to="/" className="navbar-brand">
                         <FiBook className="brand-icon" />
-                        <span>Faculty Portal</span>
+                        <span>SSET Lumina</span>
                     </Link>
 
                     {/* Desktop links */}
@@ -117,7 +117,7 @@ const Navbar = () => {
                 <div className="mobile-menu-header">
                     <Link to="/" className="navbar-brand" onClick={() => setMenuOpen(false)}>
                         <FiBook className="brand-icon" />
-                        <span>Faculty Portal</span>
+                        <span>SSET Lumina</span>
                     </Link>
                     <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }} onClick={() => setMenuOpen(false)}>
                         <FiX size={22} />

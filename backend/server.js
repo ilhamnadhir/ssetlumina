@@ -58,7 +58,7 @@ app.use('/api/admin', adminRoutes);
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'OK',
-        message: 'Faculty Portal API is running',
+        message: 'SSET Lumina API is running',
         timestamp: new Date().toISOString()
     });
 });

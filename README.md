@@ -1,2 +1,2 @@
-# minipro
+# SSET Lumina
 

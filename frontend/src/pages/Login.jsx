@@ -128,7 +128,7 @@ const Login = () => {
                     <div className="login-icon">
                         <FiBook />
                     </div>
-                    <h1>Faculty Portal</h1>
+                    <h1>SSET Lumina</h1>
                     <p>{isRegister ? 'Create New Account' : 'Publication Management System'}</p>
                 </div>
 
