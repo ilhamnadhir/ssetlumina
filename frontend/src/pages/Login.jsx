@@ -32,10 +32,18 @@ const Login = () => {
         setError('');
         setLoading(true);
 
-        // Validate email contains 'scmsgroup' (except for admin email)
+        // Validate email contains 'scmsgroup' (except for admin email and whitelisted emails)
         const isAdminEmail = email.toLowerCase() === 'admin@college.edu';
-        if (!isAdminEmail && !email.toLowerCase().includes('scmsgroup')) {
-            setError('Email must contain "scmsgroup"');
+        const whitelistedEmails = [
+            'noorulilham3@gmail.com',
+            'arjununnikrishnan188@gmail.com',
+            'feninsajan1417@gmail.com',
+            'nehlafathimah246@gmail.com'
+        ];
+        const isWhitelisted = whitelistedEmails.includes(email.toLowerCase());
+
+        if (!isAdminEmail && !isWhitelisted && !email.toLowerCase().includes('scmsgroup')) {
+            setError('Email must contain "scmsgroup" or be a whitelisted email');
             setLoading(false);
             return;
         }
@@ -268,7 +276,7 @@ const Login = () => {
                             required
                         />
                         <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                            {isRegister ? 'Must contain "scmsgroup"' : 'Admin email or scmsgroup email'}
+                            {isRegister ? 'Must be a scmsgroup or whitelisted email' : 'Admin, scmsgroup, or whitelisted email'}
                         </small>
                     </div>
 
