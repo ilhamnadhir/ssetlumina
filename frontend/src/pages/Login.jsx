@@ -23,6 +23,8 @@ const Login = () => {
     const [isRegister, setIsRegister] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [otpSent, setOtpSent] = useState(false);
+    const [otp, setOtp] = useState('');
     const { login } = useAuth();
     const navigate = useNavigate();
 
@@ -32,51 +34,68 @@ const Login = () => {
         setError('');
         setLoading(true);
 
-        // Validate email contains 'scmsgroup' (except for admin email and whitelisted emails)
-        const isAdminEmail = email.toLowerCase() === 'admin@college.edu';
-        const whitelistedEmails = [
-            'noorulilham3@gmail.com',
-            'arjununnikrishnan188@gmail.com',
-            'feninsajan1417@gmail.com',
-            'nehlafathimah246@gmail.com'
-        ];
-        const isWhitelisted = whitelistedEmails.includes(email.toLowerCase());
-
-        if (!isAdminEmail && !isWhitelisted && !email.toLowerCase().includes('scmsgroup')) {
-            setError('Email must contain "scmsgroup" or be a whitelisted email');
-            setLoading(false);
-            return;
-        }
-
         if (isRegister) {
-            // Validate registration fields
-            if (password !== confirmPassword) {
-                setError('Passwords do not match');
+            if (!otpSent) {
+                // Phase 1: Validate and send OTP
+                const isAdminEmail = email.toLowerCase() === 'admin@college.edu';
+                const whitelistedEmails = [
+                    'noorulilham3@gmail.com',
+                    'arjununnikrishnan188@gmail.com',
+                    'feninsajan1417@gmail.com',
+                    'nehlafathimah246@gmail.com'
+                ];
+                const isWhitelisted = whitelistedEmails.includes(email.toLowerCase());
+
+                if (!isAdminEmail && !isWhitelisted && !email.toLowerCase().includes('scmsgroup')) {
+                    setError('Email must contain "scmsgroup" or be a whitelisted email');
+                    setLoading(false);
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    setError('Passwords do not match');
+                    setLoading(false);
+                    return;
+                }
+
+                if (password.length < 6) {
+                    setError('Password must be at least 6 characters');
+                    setLoading(false);
+                    return;
+                }
+
+                if (!name || !facultyId || !department || !email || !password) {
+                    setError('Please fill in all required fields');
+                    setLoading(false);
+                    return;
+                }
+
+                try {
+                    await api.post('/auth/send-otp', { email });
+                    setOtpSent(true);
+                    setError('OTP sent to your email. Please check your inbox.');
+                } catch (err) {
+                    setError(err.response?.data?.message || 'Failed to send OTP. Please try again.');
+                }
                 setLoading(false);
                 return;
             }
 
-            if (password.length < 6) {
-                setError('Password must be at least 6 characters');
+            // Phase 2: Verify OTP and register
+            if (!otp || otp.length !== 6) {
+                setError('Please enter a valid 6-digit OTP');
                 setLoading(false);
                 return;
             }
 
-            if (!name || !facultyId || !department) {
-                setError('Please fill in all required fields');
-                setLoading(false);
-                return;
-            }
-
-            // Register new user and create faculty profile
             try {
-                // First, register the user
+                // First, register the user with OTP
                 let userData;
                 try {
-                    const userResponse = await api.post('/auth/register', { email, password, role: 'faculty' });
+                    const userResponse = await api.post('/auth/register', { email, password, role: 'faculty', otp });
                     userData = userResponse.data;
                 } catch (regErr) {
-                    setError(regErr.response?.data?.message || 'Registration failed');
+                    setError(regErr.response?.data?.message || 'Registration failed or Invalid OTP');
                     setLoading(false);
                     return;
                 }
@@ -118,6 +137,21 @@ const Login = () => {
             }
         } else {
             // Login existing user
+            const isAdminEmail = email.toLowerCase() === 'admin@college.edu';
+            const whitelistedEmails = [
+                'noorulilham3@gmail.com',
+                'arjununnikrishnan188@gmail.com',
+                'feninsajan1417@gmail.com',
+                'nehlafathimah246@gmail.com'
+            ];
+            const isWhitelisted = whitelistedEmails.includes(email.toLowerCase());
+
+            if (!isAdminEmail && !isWhitelisted && !email.toLowerCase().includes('scmsgroup')) {
+                setError('Email must contain "scmsgroup" or be a whitelisted email');
+                setLoading(false);
+                return;
+            }
+
             const result = await login({ email, password });
 
             if (result.success) {
@@ -156,7 +190,7 @@ const Login = () => {
                         </div>
                     )}
 
-                    {isRegister && (
+                    {isRegister && !otpSent && (
                         <>
                             <div className="form-group">
                                 <label className="form-label">
@@ -261,86 +295,129 @@ const Login = () => {
                         </>
                     )}
 
-                    <div className="form-group">
-                        <label className="form-label">
-                            <FiMail />
-                            Email Address *
-                        </label>
-                        <input
-                            type="email"
-                            className="form-input"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="your.email@scmsgroup.com"
-                            autoComplete="off"
-                            required
-                        />
-                        <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                            {isRegister ? 'Must be a scmsgroup or whitelisted email' : 'Admin, scmsgroup, or whitelisted email'}
-                        </small>
-                    </div>
+                    {(!isRegister || !otpSent) && (
+                        <>
+                            <div className="form-group">
+                                <label className="form-label">
+                                    <FiMail />
+                                    Email Address *
+                                </label>
+                                <input
+                                    type="email"
+                                    className="form-input"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="your.email@scmsgroup.com"
+                                    autoComplete="off"
+                                    required
+                                />
+                                <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                                    {isRegister ? 'Must be a scmsgroup or whitelisted email' : 'Admin, scmsgroup, or whitelisted email'}
+                                </small>
+                            </div>
 
-                    <div className="form-group">
-                        <label className="form-label">
-                            <FiLock />
-                            Password *
-                        </label>
-                        <div className="password-wrapper">
-                            <input
-                                type={showPassword ? 'text' : 'password'}
-                                className="form-input"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Enter your password"
-                                autoComplete="new-password"
-                                required
-                                minLength={6}
-                            />
-                            <button
-                                type="button"
-                                className="eye-toggle"
-                                onClick={() => setShowPassword(!showPassword)}
-                                tabIndex={-1}
-                            >
-                                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                            </button>
-                        </div>
-                        <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                            Minimum 6 characters
-                        </small>
-                    </div>
+                            <div className="form-group">
+                                <label className="form-label">
+                                    <FiLock />
+                                    Password *
+                                </label>
+                                <div className="password-wrapper">
+                                    <input
+                                        type={showPassword ? 'text' : 'password'}
+                                        className="form-input"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="Enter your password"
+                                        autoComplete="new-password"
+                                        required
+                                        minLength={6}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="eye-toggle"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        tabIndex={-1}
+                                    >
+                                        {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                                    </button>
+                                </div>
+                                <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                                    Minimum 6 characters
+                                </small>
+                            </div>
 
-                    {isRegister && (
+                            {isRegister && (
+                                <div className="form-group">
+                                    <label className="form-label">
+                                        <FiLock />
+                                        Confirm Password *
+                                    </label>
+                                    <div className="password-wrapper">
+                                        <input
+                                            type={showConfirmPassword ? 'text' : 'password'}
+                                            className="form-input"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            placeholder="Re-enter your password"
+                                            autoComplete="new-password"
+                                            required
+                                            minLength={6}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="eye-toggle"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            tabIndex={-1}
+                                        >
+                                            {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {isRegister && otpSent && (
                         <div className="form-group">
                             <label className="form-label">
                                 <FiLock />
-                                Confirm Password *
+                                Enter 6-Digit OTP *
                             </label>
-                            <div className="password-wrapper">
-                                <input
-                                    type={showConfirmPassword ? 'text' : 'password'}
-                                    className="form-input"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    placeholder="Re-enter your password"
-                                    autoComplete="new-password"
-                                    required
-                                    minLength={6}
-                                />
+                            <input
+                                type="text"
+                                className="form-input"
+                                value={otp}
+                                onChange={(e) => setOtp(e.target.value)}
+                                placeholder="XXXXXX"
+                                maxLength={6}
+                                required
+                            />
+                            <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                                A verification code was sent to {email}. Check your email inbox.
+                            </small>
+                            <div style={{ textAlign: 'right', marginTop: '0.5rem' }}>
                                 <button
                                     type="button"
-                                    className="eye-toggle"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    tabIndex={-1}
+                                    onClick={() => { setOtpSent(false); setOtp(''); setError(''); }}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        color: 'var(--primary-light)',
+                                        cursor: 'pointer',
+                                        fontSize: '0.875rem',
+                                        textDecoration: 'underline'
+                                    }}
                                 >
-                                    {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                                    Change details or resend
                                 </button>
                             </div>
                         </div>
                     )}
 
                     <button type="submit" className="btn-login" disabled={loading}>
-                        {loading ? (isRegister ? 'Creating Account...' : 'Signing in...') : (isRegister ? 'Create Account' : 'Sign In')}
+                        {loading
+                            ? (isRegister ? (otpSent ? 'Verifying...' : 'Sending OTP...') : 'Signing in...')
+                            : (isRegister ? (otpSent ? 'Verify OTP & Register' : 'Send OTP') : 'Sign In')}
                     </button>
 
                     <div style={{ textAlign: 'center', marginTop: 'var(--spacing-md)' }}>
@@ -357,6 +434,8 @@ const Login = () => {
                                 setPhone('');
                                 setSpecialization('');
                                 setConfirmPassword('');
+                                setOtpSent(false);
+                                setOtp('');
                             }}
                             style={{
                                 background: 'none',
