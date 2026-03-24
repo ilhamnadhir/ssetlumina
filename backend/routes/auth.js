@@ -4,7 +4,6 @@ import User from '../models/User.js';
 import Faculty from '../models/Faculty.js';
 import { authenticate } from '../middleware/auth.js';
 import OTP from '../models/OTP.js';
-import nodemailer from 'nodemailer';
 
 const router = express.Router();
 
@@ -42,27 +41,28 @@ router.post('/send-otp', async (req, res) => {
         const newOTP = new OTP({ email, otp });
         await newOTP.save();
 
-        let transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 465,
-            secure: true, // Use SSL/TLS
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'api-key': process.env.BREVO_API_KEY
             },
-            tls: {
-                rejectUnauthorized: false
-            }
+            body: JSON.stringify({
+                sender: { name: "SSET Lumina", email: process.env.EMAIL_USER },
+                to: [{ email: email }],
+                subject: "Your Registration OTP",
+                htmlContent: `<p>Your OTP for registration is <strong>${otp}</strong>. It is valid for 5 minutes.</p>`
+            })
         });
 
-        let info = await transporter.sendMail({
-            from: `"SSET Lumina" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: "Your Registration OTP",
-            text: `Your OTP for registration is ${otp}. It is valid for 5 minutes.`,
-        });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error("Brevo API Error:", errorData);
+            return res.status(500).json({ message: 'Failed to send OTP via Brevo', error: errorData });
+        }
 
-        console.log("OTP sent to: %s", email);
+        console.log("OTP sent to: %s via Brevo API", email);
 
         res.status(200).json({ message: 'OTP sent successfully. Please check your email inbox.' });
 
