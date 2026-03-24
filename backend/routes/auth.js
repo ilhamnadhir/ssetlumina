@@ -51,7 +51,7 @@ router.post('/send-otp', async (req, res) => {
         });
 
         let info = await transporter.sendMail({
-            from: `"Faculty Portal" <${process.env.EMAIL_USER}>`,
+            from: `"SSET Lumina" <${process.env.EMAIL_USER}>`,
             to: email,
             subject: "Your Registration OTP",
             text: `Your OTP for registration is ${otp}. It is valid for 5 minutes.`,
@@ -138,13 +138,13 @@ router.post('/login', async (req, res) => {
         // Find user
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(401).json({ message: 'Invalid credentials' });
+            return res.status(401).json({ message: 'User not found' });
         }
 
         // Check password
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
-            return res.status(401).json({ message: 'Invalid credentials' });
+            return res.status(401).json({ message: 'Incorrect password' });
         }
 
         // Get faculty profile if exists
