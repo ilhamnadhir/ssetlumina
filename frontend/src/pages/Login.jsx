@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import api from '../services/api';
 import { FiMail, FiLock, FiBook, FiUser, FiBriefcase, FiHash, FiEye, FiEyeOff, FiSun, FiMoon } from 'react-icons/fi';
-import ssetLogo from '/logo-removebg-preview.png';
+import ssetLogo from '/Picture1.png';
 import './Login.css';
 
 const Login = () => {

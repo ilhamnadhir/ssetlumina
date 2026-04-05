@@ -2,7 +2,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { FiHome, FiBook, FiUsers, FiFileText, FiLogOut, FiSettings, FiSun, FiMoon, FiUser, FiMenu, FiX } from 'react-icons/fi';
-import ssetLogo from '/logo-removebg-preview.png';
+import ssetLogo from '/Picture1.png';
 import { useState, useEffect } from 'react';
 import { facultyAPI } from '../services/api';
 import './Navbar.css';
