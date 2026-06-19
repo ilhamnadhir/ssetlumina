@@ -1,10 +1,12 @@
 # 🎓 SSET Lumina
 
-Hosted link: https://ssetlumina.vercel.app/
-
 > IRINS-inspired Faculty Publication Management Portal for recording, managing, and showcasing academic publications at SCMS School of Engineering and Technology (SSET).
 
 ---
+
+Hosted link: https://ssetlumina.vercel.app/
+Use guest mail: guest@college.edu 
+password: GuestPassword123!
 
 ## 📌 Overview
 
