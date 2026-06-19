@@ -184,6 +184,11 @@ router.post('/', authenticate, async (req, res) => {
             createdBy: req.user._id
         });
 
+        // Set 15 minutes TTL for publications added by guest user
+        if (req.user.email === 'guest@college.edu') {
+            publication.expireAt = new Date(Date.now() + 15 * 60 * 1000);
+        }
+
         await publication.save();
 
         const populatedPublication = await Publication.findById(publication._id)

@@ -182,6 +182,10 @@ const publicationSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
+    },
+    expireAt: {
+        type: Date,
+        index: { expires: 0 }
     }
 }, {
     timestamps: true

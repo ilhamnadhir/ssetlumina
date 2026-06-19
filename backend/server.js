@@ -9,7 +9,7 @@ import facultyRoutes from './routes/faculty.js';
 import publicationRoutes from './routes/publications.js';
 import departmentRoutes from './routes/departments.js';
 import adminRoutes from './routes/admin.js';
-import { autoSeedIfEmpty } from './autoSeed.js';
+import { autoSeedIfEmpty, ensureGuestUser } from './autoSeed.js';
 
 // Load environment variables
 dotenv.config();
@@ -44,6 +44,7 @@ mongoose.connect(process.env.MONGODB_URI)
     .then(async () => {
         console.log('✅ MongoDB connected successfully');
         await autoSeedIfEmpty();
+        await ensureGuestUser();
     })
     .catch((err) => console.error('❌ MongoDB connection error:', err));
 

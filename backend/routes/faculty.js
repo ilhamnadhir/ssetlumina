@@ -207,6 +207,10 @@ router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
             return res.status(404).json({ message: 'Faculty not found' });
         }
 
+        if (faculty.email === 'guest@college.edu') {
+            return res.status(403).json({ message: 'Cannot delete the demo/guest account.' });
+        }
+
         // Delete associated user account
         await User.findByIdAndDelete(faculty.userId);
 

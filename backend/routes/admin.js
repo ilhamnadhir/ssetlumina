@@ -156,6 +156,10 @@ router.put('/users/:id/role', authenticate, requireAdmin, async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        if (user.email === 'guest@college.edu') {
+            return res.status(403).json({ message: 'Cannot modify role for the demo/guest account.' });
+        }
+
         user.role = role;
         await user.save();
 

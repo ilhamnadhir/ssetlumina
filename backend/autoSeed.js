@@ -74,3 +74,52 @@ export async function autoSeedIfEmpty() {
         console.error('❌ Auto-seed error:', error.message);
     }
 }
+
+export async function ensureGuestUser() {
+    try {
+        const email = 'guest@college.edu';
+        let user = await User.findOne({ email });
+        if (!user) {
+            console.log('🌱 Guest user not found, creating guest account...');
+            // Find a department to associate
+            let department = await Department.findOne();
+            if (!department) {
+                // Create a fallback department if none exist
+                department = new Department({
+                    name: 'Computer Science and Engineering',
+                    code: 'CSE',
+                    description: 'Computer Science & Engineering Department'
+                });
+                await department.save();
+            }
+
+            user = new User({
+                email,
+                password: 'GuestPassword123!',
+                role: 'faculty'
+            });
+            await user.save();
+
+            const faculty = new Faculty({
+                name: 'Guest User',
+                facultyId: 'FACGUEST',
+                department: department._id,
+                role: 'Assistant Professor',
+                email,
+                phone: '+91-0000000000',
+                specialization: 'Demo Guest Account',
+                qualifications: ['B.Tech'],
+                userId: user._id
+            });
+            await faculty.save();
+
+            user.facultyId = faculty._id;
+            await user.save();
+            console.log('✅ Guest user created: guest@college.edu / GuestPassword123!');
+        } else {
+            console.log('📦 Guest user already exists: guest@college.edu');
+        }
+    } catch (err) {
+        console.error('❌ Error ensuring guest user:', err.message);
+    }
+}
