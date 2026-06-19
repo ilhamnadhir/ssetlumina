@@ -138,6 +138,7 @@ const Login = () => {
         } else {
             // Login existing user
             const isAdminEmail = email.toLowerCase() === 'admin@college.edu';
+            const isGuestEmail = email.toLowerCase() === 'guest@college.edu';
             const whitelistedEmails = [
                 'noorulilham3@gmail.com',
                 'arjununnikrishnan188@gmail.com',
@@ -146,7 +147,7 @@ const Login = () => {
             ];
             const isWhitelisted = whitelistedEmails.includes(email.toLowerCase());
 
-            if (!isAdminEmail && !isWhitelisted && !email.toLowerCase().includes('scmsgroup')) {
+            if (!isAdminEmail && !isGuestEmail && !isWhitelisted && !email.toLowerCase().includes('scmsgroup')) {
                 setError('Email must contain "scmsgroup" or be a whitelisted email');
                 setLoading(false);
                 return;
